@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Wallet } from "@coinbase/onchainkit/wallet";
 import {
   buildMatchCandidate,
   describeCategory,
   type CompatibilityProfile,
 } from "@/lib/matching/compatibility";
 import { MatchCard, type MatchDecision } from "./components/MatchCard";
+import { WalletAuthPanel } from "./components/WalletAuthPanel";
 import styles from "./page.module.css";
 
 const seekerProfile: CompatibilityProfile = {
@@ -217,7 +217,7 @@ export default function Home() {
             surface matches who share your token thesis, DeFi strategies, and NFT vibes.
           </p>
           <div className={styles.ctaRow}>
-            <Wallet />
+            <WalletAuthPanel />
             <div className={styles.heroStats}>
               <div>
                 <span>{seekerProfile.user.personality}</span>

@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Set up core authentication and wallet integration
+- [x] 1. Set up core authentication and wallet integration
   - Implement Base Account authentication with SIWF integration
   - Create user session management with JWT tokens
   - Set up wallet address verification and ENS/Basename resolution
