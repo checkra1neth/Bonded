@@ -4,6 +4,8 @@ import { base } from "wagmi/chains";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import "@coinbase/onchainkit/styles.css";
 
+import { AuthProvider } from "./providers/AuthProvider";
+
 export function RootProvider({ children }: { children: ReactNode }) {
   return (
     <OnchainKitProvider
@@ -24,7 +26,7 @@ export function RootProvider({ children }: { children: ReactNode }) {
         notificationProxyUrl: undefined,
       }}
     >
-      {children}
+      <AuthProvider>{children}</AuthProvider>
     </OnchainKitProvider>
   );
 }

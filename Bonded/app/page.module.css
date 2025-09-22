@@ -1,39 +1,272 @@
-.container {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  min-height: 100vh;
-}
-
-.headerWrapper {
-  display: flex;
-  justify-content: flex-end;
-  padding: 1rem;
-}
-
-.content {
+.page {
   display: flex;
   flex-direction: column;
+  gap: 3rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hero {
+  display: grid;
+  gap: clamp(2rem, 5vw, 3rem);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: stretch;
+}
+
+.heroContent {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.badge {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding-bottom: 5vh;
+  gap: 0.5rem;
+  width: fit-content;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
 }
 
-.title {
-  font-size: clamp(2rem, 8vw, 80px);
-  font-weight: 500;
-  letter-spacing: -0.02em;
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.1rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 
-.componentsTitle {
+.hero p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--foreground) 75%, transparent);
+}
+
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.heroStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+.heroStats div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.heroStats span {
+  font-size: 1.1rem;
   font-weight: 600;
-  margin-top: 2rem;
 }
 
-.components {
-  list-style-type: disc;
-  margin-top: 0.75rem;
+.heroStats small {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
 }
 
-.components a:hover {
-  text-decoration: underline;
+.requirements {
+  display: grid;
+  gap: 0.6rem;
+  padding-left: 1.1rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  font-size: 0.95rem;
+}
+
+.progressCard {
+  display: grid;
+  gap: 1rem;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--foreground) 6%, transparent), transparent 60%);
+  padding: clamp(1.5rem, 3vw, 2rem);
+  box-shadow: 0 28px 60px rgba(12, 17, 53, 0.12);
+}
+
+.progressCopy {
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.progressTrack {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 10%, transparent);
+  overflow: hidden;
+}
+
+.progressValue {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5f5bff, #00d1ff);
+}
+
+.progressList {
+  display: grid;
+  gap: 0.9rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.progressList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.progressList strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.progressList span {
+  display: block;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.statusBadge {
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.main {
+  display: grid;
+  gap: clamp(2rem, 5vw, 3rem);
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+}
+
+.matchSection {
+  min-height: 520px;
+}
+
+.emptyState {
+  height: 100%;
+  border-radius: 24px;
+  border: 1px dashed color-mix(in srgb, var(--foreground) 14%, transparent);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 3rem;
+  gap: 1rem;
+}
+
+.emptyState h2 {
+  font-size: 1.8rem;
+}
+
+.sidebar {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.panel {
+  display: grid;
+  gap: 1rem;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  padding: 1.5rem;
+}
+
+.panel h3 {
+  font-size: 1.1rem;
+}
+
+.panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.panel li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: color-mix(in srgb, var(--foreground) 75%, transparent);
+}
+
+.panel strong {
+  font-weight: 600;
+}
+
+.logList li {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.logList li div {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.logMeta {
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.logEmpty {
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--foreground) 3%, transparent);
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.featureList li {
+  position: relative;
+  padding-left: 1.2rem;
+}
+
+.featureList li::before {
+  content: "⚡";
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+}
+
+@media (max-width: 900px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+
+  .matchSection {
+    min-height: auto;
+  }
 }
