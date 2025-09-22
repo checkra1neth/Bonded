@@ -1,11 +1,10 @@
-'use client'
-
+"use client";
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Heart, Zap, Users, TrendingUp } from 'lucide-react'
+import { Wallet } from "@coinbase/onchainkit/wallet";
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { ConnectWallet } from '@/components/connect-wallet'
 import { useAccount } from 'wagmi'
 import { useRouter } from 'next/navigation'
 
@@ -68,7 +67,9 @@ export default function HomePage() {
               transition={{ delay: 0.6 }}
               className="space-y-4"
             >
-              <ConnectWallet />
+              <div className="flex justify-center">
+                <Wallet />
+              </div>
               <p className="text-sm text-blue-200">
                 Connect your wallet to start matching with crypto enthusiasts
               </p>
@@ -254,7 +255,9 @@ export default function HomePage() {
             <p className="text-xl mb-8 text-blue-100">
               Join thousands of crypto enthusiasts finding love onchain
             </p>
-            <ConnectWallet />
+            <div className="flex justify-center">
+              <Wallet />
+            </div>
           </motion.div>
         </div>
       </section>
