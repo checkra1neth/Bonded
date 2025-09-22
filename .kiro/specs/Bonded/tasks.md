@@ -8,7 +8,7 @@
   - _Requirements: 1.1, 1.2, 7.3_
 
 - [ ] 2. Build portfolio analysis foundation
-  - [ ] 2.1 Create portfolio data models and database schema enhancements
+  - [x] 2.1 Create portfolio data models and database schema enhancements
     - Extend Prisma schema with PortfolioPrivacy and CompatibilityAnalysis models
     - Implement portfolio data types and interfaces
     - Create database migration scripts

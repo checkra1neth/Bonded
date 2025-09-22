@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PortfolioVisibilityLevel {
+  HIDDEN
+  SUMMARY
+  DETAILED
+}
+
+enum ActivityVisibilityLevel {
+  HIDDEN
+  TIMEZONE_ONLY
+  PATTERNS
+}
+
+enum CompatibilityCategory {
+  CRYPTO_SOULMATES
+  DEFI_COMPATIBLE
+  POTENTIAL_MATCH
+  DIFFERENT_STRATEGIES
+}
+
+model User {
+  id            String   @id @default(cuid())
+  walletAddress String   @unique
+  fid           Int?
+  ensName       String?
+  basename      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  portfolio             Portfolio?
+  compatibilityAnalyses CompatibilityAnalysis[] @relation("AnalysisOwner")
+  compatibilityResults  CompatibilityAnalysis[] @relation("AnalysisTarget")
+}
+
+model Portfolio {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String   @unique
+  snapshot   Json
+  highlights String[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  privacy  PortfolioPrivacy?
+  analyses CompatibilityAnalysis[] @relation("AnalysisPortfolio")
+}
+
+model PortfolioPrivacy {
+  id                 String                   @id @default(cuid())
+  portfolio          Portfolio                @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolioId        String                   @unique
+  shareTokens        Boolean                  @default(true)
+  shareDefi          Boolean                  @default(true)
+  shareNfts          Boolean                  @default(true)
+  shareActivity      Boolean                  @default(true)
+  shareHighlights    Boolean                  @default(true)
+  tokenVisibility    PortfolioVisibilityLevel @default(SUMMARY)
+  defiVisibility     PortfolioVisibilityLevel @default(SUMMARY)
+  nftVisibility      PortfolioVisibilityLevel @default(SUMMARY)
+  activityVisibility ActivityVisibilityLevel  @default(PATTERNS)
+  viewerFids         Int[]
+  viewerAddresses    String[]
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+}
+
+model CompatibilityAnalysis {
+  id              String                @id @default(cuid())
+  owner           User                  @relation("AnalysisOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId         String
+  target          User?                 @relation("AnalysisTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+  targetUserId    String?
+  portfolio       Portfolio             @relation("AnalysisPortfolio", fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolioId     String
+  snapshot        Json
+  sharedInterests Json
+  reasoning       Json
+  overallScore    Float
+  tokenScore      Float
+  defiScore       Float
+  nftScore        Float
+  activityScore   Float
+  category        CompatibilityCategory
+  highlights      String[]
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([ownerId], map: "CompatibilityAnalysis_ownerId_idx")
+  @@index([targetUserId], map: "CompatibilityAnalysis_targetUserId_idx")
+  @@index([portfolioId], map: "CompatibilityAnalysis_portfolioId_idx")
+}

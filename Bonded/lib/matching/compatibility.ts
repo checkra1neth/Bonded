@@ -1,3 +1,13 @@
+import type {
+  ActivityPattern,
+  DeFiProtocol,
+  NFTCollection,
+  PortfolioSnapshot,
+  RiskTolerance,
+  TokenHolding,
+  TradingFrequency,
+} from "../portfolio/types";
+
 type Personality =
   | "Banker"
   | "DeFi Degen"
@@ -6,44 +16,15 @@ type Personality =
   | "Diamond Hands"
   | "Day Trader";
 
-type RiskTolerance = "conservative" | "balanced" | "adventurous" | "degenerate";
-
-type TradingFrequency = "daily" | "weekly" | "monthly" | "occasionally";
-
-export interface TokenHolding {
-  symbol: string;
-  allocation: number;
-  conviction?: "high" | "medium" | "exploratory";
-  chain?: string;
-}
-
-export interface DeFiProtocol {
-  name: string;
-  category: "lending" | "dex" | "staking" | "perps" | "yield" | "infrastructure";
-  strategy?: string;
-  risk?: RiskTolerance;
-}
-
-export interface NFTCollection {
-  name: string;
-  theme: "art" | "gaming" | "pfp" | "music" | "metaverse" | "collectible";
-  vibe?: "playful" | "luxury" | "cypherpunk" | "degen" | "artsy";
-}
-
-export interface ActivityPattern {
-  timezoneOffset: number; // hours relative to UTC
-  activeHours: number[]; // 0-23 values
-  tradingFrequency: TradingFrequency;
-  riskTolerance: RiskTolerance;
-}
-
-export interface PortfolioSnapshot {
-  tokens: TokenHolding[];
-  defiProtocols: DeFiProtocol[];
-  nftCollections: NFTCollection[];
-  activity: ActivityPattern;
-  highlights?: string[];
-}
+export type {
+  ActivityPattern,
+  DeFiProtocol,
+  NFTCollection,
+  PortfolioSnapshot,
+  RiskTolerance,
+  TokenHolding,
+  TradingFrequency,
+} from "../portfolio/types";
 
 export interface UserProfile {
   id: string;
@@ -104,7 +85,7 @@ export interface MatchCandidate {
   icebreakers: string[];
 }
 
-const SCORE_WEIGHTS = {
+export const SCORE_WEIGHTS = {
   token: 0.6,
   defi: 0.25,
   nft: 0.1,
