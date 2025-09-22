@@ -1,0 +1,194 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Base Account Integration
+  walletAddress String  @unique
+  basename      String?
+  fid           Int?    @unique // Farcaster ID
+
+  // Profile Information
+  name        String?
+  bio         String?
+  age         Int?
+  location    String?
+  profilePic  String?
+  isVerified  Boolean @default(false)
+  isActive    Boolean @default(true)
+
+  // Crypto Profile
+  cryptoPersonality CryptoPersonality?
+  portfolioValue    PortfolioTier      @default(UNKNOWN)
+  joinedCrypto      DateTime?
+  
+  // Privacy Settings
+  showPortfolio     Boolean @default(true)
+  showNFTs          Boolean @default(true)
+  showDeFiActivity  Boolean @default(true)
+
+  // Relationships
+  portfolio     Portfolio?
+  sentLikes     Like[]        @relation("LikeSender")
+  receivedLikes Like[]        @relation("LikeReceiver")
+  matches       Match[]       @relation("MatchUser1")
+  matchedBy     Match[]       @relation("MatchUser2")
+  sentMessages  Message[]     @relation("MessageSender")
+  groupMembers  GroupMember[]
+  
+  @@map("users")
+}
+
+model Portfolio {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Portfolio Analysis
+  totalValue      Float    @default(0)
+  lastAnalyzed    DateTime @default(now())
+  
+  // Top Holdings (anonymized)
+  topTokens       Json     // Array of {symbol, percentage, category}
+  nftCollections  Json     // Array of {name, count, floorPrice}
+  defiProtocols   Json     // Array of {protocol, category, tvl}
+  
+  // Behavioral Analysis
+  riskScore       Float    @default(0.5) // 0-1 scale
+  diversityScore  Float    @default(0.5) // 0-1 scale
+  activityScore   Float    @default(0.5) // 0-1 scale
+  
+  @@map("portfolios")
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  senderId   String
+  receiverId String
+  isSuper    Boolean @default(false)
+  message    String? // Optional message with like
+
+  sender   User @relation("LikeSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("LikeReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@map("likes")
+}
+
+model Match {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  
+  user1Id String
+  user2Id String
+  
+  compatibilityScore Float   // 0-1 compatibility score
+  icebreaker         String? // AI-generated conversation starter
+  isActive           Boolean @default(true)
+  
+  user1 User @relation("MatchUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2 User @relation("MatchUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  
+  messages Message[]
+  
+  @@unique([user1Id, user2Id])
+  @@map("matches")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  
+  matchId  String
+  senderId String
+  content  String
+  type     MessageType @default(TEXT)
+  
+  match  Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  sender User  @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  
+  name        String
+  description String?
+  category    GroupCategory
+  isPublic    Boolean  @default(true)
+  maxMembers  Int      @default(50)
+  
+  members GroupMember[]
+  
+  @@map("groups")
+}
+
+model GroupMember {
+  id       String   @id @default(cuid())
+  joinedAt DateTime @default(now())
+  
+  userId  String
+  groupId String
+  role    GroupRole @default(MEMBER)
+  
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, groupId])
+  @@map("group_members")
+}
+
+// Enums
+enum CryptoPersonality {
+  BANKER      // Conservative, stablecoins
+  DEFI_DEGEN  // High risk DeFi
+  NFT_COLLECTOR // Focus on NFTs
+  GAMEFI_PLAYER // Gaming tokens
+  DIAMOND_HANDS // Long-term holder
+  DAY_TRADER   // Active trading
+}
+
+enum PortfolioTier {
+  UNKNOWN
+  SMALL     // < $1K
+  MEDIUM    // $1K - $10K
+  LARGE     // $10K - $100K
+  WHALE     // $100K+
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  CRYPTO_GIFT // Sending tokens/NFTs
+  CHALLENGE   // Crypto challenge invitation
+}
+
+enum GroupCategory {
+  DEFI
+  NFT
+  GAMING
+  TRADING
+  GENERAL
+}
+
+enum GroupRole {
+  ADMIN
+  MODERATOR
+  MEMBER
+}
