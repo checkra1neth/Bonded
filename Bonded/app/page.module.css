@@ -276,6 +276,10 @@
   display: block;
 }
 
+.socialSection {
+  display: block;
+}
+
 .matchSection {
   display: flex;
   justify-content: center;
