@@ -58,7 +58,7 @@ export class IcebreakerGenerationError extends Error {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (this as any).cause = options.cause;
-      } catch (error) {
+      } catch {
         // ignore if cause assignment fails
       }
     }
