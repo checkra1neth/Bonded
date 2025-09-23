@@ -22,6 +22,16 @@ export type {
   TradingFrequency,
 } from "../portfolio/types";
 
+export type ProfileVerificationStatus = "verified" | "pending" | "unverified";
+
+export interface ProfileVerification {
+  id: string;
+  label: string;
+  status: ProfileVerificationStatus;
+  detail?: string;
+  lastChecked?: number;
+}
+
 export interface UserProfile {
   id: string;
   displayName: string;
@@ -29,8 +39,10 @@ export interface UserProfile {
   personality: Personality;
   avatarColor?: string;
   location?: string;
+  headline?: string;
   bio?: string;
   achievements?: string[];
+  verifications?: ProfileVerification[];
 }
 
 export interface CompatibilityProfile {
