@@ -1,16 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   buildMatchCandidate,
   describeCategory,
+  type CandidateInteractionProfile,
   type CompatibilityProfile,
+  type MatchDecision,
 } from "@/lib/matching/compatibility";
-import { MatchCard, type MatchDecision } from "./components/MatchCard";
+import { MatchCard } from "./components/MatchCard";
 import { PersonalityHighlight } from "./components/PersonalityHighlight";
 import { WalletAuthPanel } from "./components/WalletAuthPanel";
 import { assessPersonality } from "@/lib/personality/assessment";
 import styles from "./page.module.css";
+import { useMatchQueue } from "./hooks/useMatchQueue";
 
 const seekerPortfolio: CompatibilityProfile["portfolio"] = {
   tokens: [
@@ -57,7 +60,11 @@ const seekerProfile: CompatibilityProfile = {
   portfolio: seekerPortfolio,
 };
 
-const candidateSeeds = [
+const candidateSeeds: Array<{
+  user: CompatibilityProfile["user"];
+  portfolio: CompatibilityProfile["portfolio"];
+  interaction?: CandidateInteractionProfile;
+}> = [
   {
     user: {
       id: "nova-yield",
@@ -91,6 +98,10 @@ const candidateSeeds = [
         tradingFrequency: "daily",
         riskTolerance: "balanced",
       },
+    },
+    interaction: {
+      initialDecision: "like",
+      autoResponse: { onSuperLike: "super" },
     },
   },
   {
@@ -126,6 +137,9 @@ const candidateSeeds = [
         riskTolerance: "adventurous",
       },
     },
+    interaction: {
+      autoResponse: { onLike: "pass", onSuperLike: "like" },
+    },
   },
   {
     user: {
@@ -160,6 +174,9 @@ const candidateSeeds = [
         riskTolerance: "balanced",
       },
     },
+    interaction: {
+      autoResponse: { onLike: "like" },
+    },
   },
 ] as const;
 
@@ -174,51 +191,45 @@ const candidateProfiles: CompatibilityProfile[] = candidateSeeds.map((candidate)
   } satisfies CompatibilityProfile;
 });
 
-type DecisionLog = {
-  userId: string;
-  displayName: string;
-  decision: MatchDecision;
-  score: number;
-  category: string;
-};
-
 export default function Home() {
-  const candidates = useMemo(
-    () => candidateProfiles.map((candidate) => buildMatchCandidate(seekerProfile, candidate)),
+  const initialCandidates = useMemo(
+    () =>
+      candidateProfiles.map((candidate, index) =>
+        buildMatchCandidate(seekerProfile, candidate, {
+          interaction: candidateSeeds[index]?.interaction,
+        }),
+      ),
     [],
   );
 
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [decisionLog, setDecisionLog] = useState<DecisionLog[]>([]);
+  const { state: queueState, activeCandidate, decide, dismissNotification, reviewedCount } =
+    useMatchQueue(initialCandidates);
 
-  const activeCandidate = candidates[activeIndex];
+  const totalCandidates = queueState.entries.length;
+  const progress = totalCandidates
+    ? Math.round((reviewedCount / totalCandidates) * 100)
+    : 0;
+  const matchesReviewed = `${reviewedCount}/${totalCandidates}`;
+  const positiveMatches = queueState.decisions.filter((entry) => entry.decision !== "pass");
+  const superLikes = queueState.decisions.filter((entry) => entry.decision === "super");
+  const decisionLog = [...queueState.decisions].sort((a, b) => b.createdAt - a.createdAt);
+  const mutualMatches = [...queueState.matches].sort((a, b) => b.createdAt - a.createdAt);
+  const notifications = queueState.notifications;
+
+  const nextCandidate = queueState.entries.find((entry, index) => {
+    if (queueState.activeIndex === -1) {
+      return false;
+    }
+    return entry.status === "pending" && index > queueState.activeIndex;
+  })?.candidate;
 
   const handleDecision = (decision: MatchDecision) => {
     if (!activeCandidate) {
       return;
     }
 
-    setDecisionLog((previous) => [
-      ...previous,
-      {
-        userId: activeCandidate.user.id,
-        displayName: activeCandidate.user.displayName,
-        decision,
-        score: activeCandidate.compatibilityScore.overall,
-        category: activeCandidate.compatibilityScore.category.label,
-      },
-    ]);
-
-    setActiveIndex((index) => {
-      const nextIndex = index + 1;
-      return nextIndex >= candidates.length ? candidates.length : nextIndex;
-    });
+    decide(activeCandidate.user.id, decision);
   };
-
-  const progress = Math.round((decisionLog.length / candidates.length) * 100);
-  const matchesReviewed = `${decisionLog.length}/${candidates.length}`;
-  const positiveMatches = decisionLog.filter((entry) => entry.decision !== "pass");
-  const superLikes = decisionLog.filter((entry) => entry.decision === "super");
 
   return (
     <div className={styles.page}>
@@ -264,20 +275,27 @@ export default function Home() {
             <span className={styles.progressValue} style={{ width: `${Math.max(progress, 4)}%` }} />
           </div>
           <ul className={styles.progressList}>
-            {candidates.map((candidate, index) => {
-              const decision = decisionLog.find((entry) => entry.userId === candidate.user.id);
-              const status =
-                decision?.decision === "super"
-                  ? "Super like sent"
-                  : decision?.decision === "like"
-                  ? "Liked"
-                  : decision?.decision === "pass"
-                  ? "Passed"
-                  : index === activeIndex
-                  ? "Reviewing now"
-                  : index < activeIndex
-                  ? "Reviewed"
-                  : "In queue";
+            {queueState.entries.map((entry, index) => {
+              const { candidate } = entry;
+              const decision = entry.decision;
+              const isActive = queueState.activeIndex === index;
+              let status: string;
+
+              if (decision) {
+                if (decision.decision === "super") {
+                  status = decision.mutual ? "Super match" : "Super like sent";
+                } else if (decision.decision === "like") {
+                  status = decision.mutual ? "Matched" : "Liked";
+                } else {
+                  status = "Passed";
+                }
+              } else if (isActive) {
+                status = "Reviewing now";
+              } else if (entry.status === "pending") {
+                status = "In queue";
+              } else {
+                status = "Reviewed";
+              }
 
               return (
                 <li key={candidate.user.id}>
@@ -293,20 +311,49 @@ export default function Home() {
         </div>
       </header>
 
+      {notifications.length > 0 && (
+        <div className={styles.notifications}>
+          {notifications.map((notification) => (
+            <div key={notification.id} className={styles.notification}>
+              <div>
+                <strong>New match</strong>
+                <span>{notification.message}</span>
+              </div>
+              <button type="button" onClick={() => dismissNotification(notification.id)}>
+                Dismiss
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <main className={styles.main}>
         <section className={styles.matchSection}>
-          {activeCandidate ? (
-            <MatchCard
-              candidate={activeCandidate}
-              isActive
-              onDecision={handleDecision}
-            />
-          ) : (
-            <div className={styles.emptyState}>
-              <h2>Queue complete</h2>
-              <p>New compatibility scans will refresh once fresh wallets opt in. Stay tuned!</p>
-            </div>
-          )}
+          <div className={styles.deck}>
+            {nextCandidate ? (
+              <div className={styles.previewCard} aria-hidden>
+                <strong>{nextCandidate.user.displayName}</strong>
+                <span>
+                  {Math.round(nextCandidate.compatibilityScore.overall * 100)}% match • {describeCategory(nextCandidate.compatibilityScore)}
+                </span>
+              </div>
+            ) : null}
+            {activeCandidate ? (
+              <div className={styles.cardSlot}>
+                <MatchCard
+                  key={activeCandidate.user.id}
+                  candidate={activeCandidate}
+                  isActive
+                  onDecision={handleDecision}
+                />
+              </div>
+            ) : (
+              <div className={`${styles.emptyState} ${styles.deckEmpty}`}>
+                <h2>Queue complete</h2>
+                <p>New compatibility scans will refresh once fresh wallets opt in. Stay tuned!</p>
+              </div>
+            )}
+          </div>
         </section>
 
         <aside className={styles.sidebar}>
@@ -340,19 +387,50 @@ export default function Home() {
           </section>
 
           <section className={styles.panel}>
+            <h3>Mutual matches</h3>
+            {mutualMatches.length === 0 ? (
+              <p className={styles.emptyCopy}>
+                No mutual matches yet. Keep exploring and send a super like to spark a connection.
+              </p>
+            ) : (
+              <ul className={styles.matchList}>
+                {mutualMatches.map((match) => (
+                  <li key={match.id}>
+                    <div>
+                      <strong>{match.displayName}</strong>
+                      <span>
+                        {Math.round(match.compatibilityScore * 100)}% •
+                        {" "}
+                        {match.decision === "super" ? "Super like" : "Liked"}
+                      </span>
+                    </div>
+                    <span className={styles.matchBadge}>Matched</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className={styles.panel}>
             <h3>Decision log</h3>
             <ul className={styles.logList}>
               {decisionLog.length === 0 ? (
                 <li className={styles.logEmpty}>No decisions yet. Review your first match to begin.</li>
               ) : (
                 decisionLog.map((entry) => (
-                  <li key={entry.userId}>
+                  <li key={entry.id}>
                     <div>
-                      <strong>{entry.displayName}</strong>
-                      <span>{Math.round(entry.score * 100)}%</span>
+                      <strong>{entry.candidateName}</strong>
+                      <span>{Math.round(entry.compatibilityScore * 100)}%</span>
                     </div>
                     <span className={styles.logMeta}>
-                      {entry.category} • {entry.decision === "pass" ? "Passed" : entry.decision === "like" ? "Liked" : "Super liked"}
+                      {entry.mutual
+                        ? "Matched"
+                        : entry.decision === "pass"
+                        ? "Passed"
+                        : entry.decision === "like"
+                        ? "Liked"
+                        : "Super liked"}
                     </span>
                   </li>
                 ))
