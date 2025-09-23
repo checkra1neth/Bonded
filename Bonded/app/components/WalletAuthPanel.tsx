@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import * as React from "react";
 import { Wallet } from "@coinbase/onchainkit/wallet";
 import { useAccount } from "wagmi";
 
-import { useAuth } from "@/app/providers/AuthProvider";
+import { useAuth } from "../providers/AuthProvider";
 import styles from "./WalletAuthPanel.module.css";
 
 function shorten(address: string) {
@@ -14,9 +14,9 @@ function shorten(address: string) {
 export function WalletAuthPanel() {
   const { status, user, isLoading, error, signIn, signOut } = useAuth();
   const { address, isConnected } = useAccount();
-  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionError, setActionError] = React.useState<string | null>(null);
 
-  const identityLabel = useMemo(() => {
+  const identityLabel = React.useMemo(() => {
     if (user) {
       return user.primaryName;
     }
@@ -28,7 +28,7 @@ export function WalletAuthPanel() {
     return "Wallet not connected";
   }, [address, user]);
 
-  const primaryButtonLabel = useMemo(() => {
+  const primaryButtonLabel = React.useMemo(() => {
     if (status === "authenticated") {
       return "Sign out";
     }
@@ -40,7 +40,7 @@ export function WalletAuthPanel() {
     return "Verify wallet";
   }, [isLoading, status]);
 
-  const helperText = useMemo(() => {
+  const helperText = React.useMemo(() => {
     if (!isConnected) {
       return "Connect your Base wallet to continue";
     }

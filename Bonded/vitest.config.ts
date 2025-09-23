@@ -6,7 +6,8 @@ const rootDir = dirname(fileURLToPath(new URL("./", import.meta.url)));
 export default {
   test: {
     environment: "node",
-    include: ["lib/**/*.test.ts"],
+    environmentMatchGlobs: [["app/**/*.test.tsx", "jsdom"]],
+    include: ["lib/**/*.test.ts", "app/**/*.test.tsx"],
     coverage: {
       enabled: false,
       provider: "v8",
@@ -15,6 +16,7 @@ export default {
   resolve: {
     alias: {
       "@": resolve(rootDir, "."),
+      "@/": `${resolve(rootDir, ".")}/`,
     },
   },
 };

@@ -1,4 +1,5 @@
-import type { PersonalityAssessment } from "@/lib/personality/types";
+import * as React from "react";
+import type { PersonalityAssessment } from "../../lib/personality/types";
 import styles from "./PersonalityHighlight.module.css";
 
 export interface PersonalityHighlightProps {
@@ -12,12 +13,13 @@ export function PersonalityHighlight({ assessment, variant = "default" }: Person
   const confidence = Math.round(assessment.confidence * 100);
 
   return (
-    <div className={`${styles.container} ${styles[variant] ?? ""}`}>
-      <div className={styles.header}>
-        <span className={styles.label}>Crypto personality</span>
-        <div className={styles.titleRow}>
-          <h4>{assessment.type}</h4>
-          <span className={styles.confidence}>Confidence {confidence}%</span>
+    <React.Fragment>
+      <div className={`${styles.container} ${styles[variant] ?? ""}`}>
+        <div className={styles.header}>
+          <span className={styles.label}>Crypto personality</span>
+          <div className={styles.titleRow}>
+            <h4>{assessment.type}</h4>
+            <span className={styles.confidence}>Confidence {confidence}%</span>
         </div>
         <p className={styles.headline}>{assessment.headline}</p>
         <p className={styles.summary}>{assessment.summary}</p>
@@ -67,6 +69,7 @@ export function PersonalityHighlight({ assessment, variant = "default" }: Person
           ))}
         </ul>
       )}
-    </div>
+      </div>
+    </React.Fragment>
   );
 }

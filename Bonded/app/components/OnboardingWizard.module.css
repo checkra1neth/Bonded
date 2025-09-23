@@ -1,0 +1,446 @@
+.wizard {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 2.25rem);
+  border-radius: 28px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--foreground) 5%, transparent), transparent 65%);
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  box-shadow: 0 32px 70px rgba(8, 12, 45, 0.18);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.header h2 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  margin: 0.4rem 0 0.2rem;
+}
+
+.header p {
+  max-width: 640px;
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.stepBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 16%, transparent);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+
+.progressStack {
+  display: grid;
+  gap: 0.4rem;
+  min-width: min(220px, 40%);
+}
+
+.progressTrack {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 12%, transparent);
+  overflow: hidden;
+}
+
+.progressValue {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(120deg, #5f5bff, #00e1ff);
+}
+
+.body {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 2fr);
+}
+
+.stepList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.stepList li {
+  margin: 0;
+}
+
+.stepButton {
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  color: inherit;
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  display: flex;
+  text-align: left;
+  transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+}
+
+.stepButton strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.stepButton small {
+  display: block;
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.stepButton:not(:disabled):hover {
+  transform: translateX(2px);
+  border-color: color-mix(in srgb, var(--foreground) 28%, transparent);
+}
+
+.stepButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.stepButton.complete {
+  border-color: color-mix(in srgb, #5f5bff 65%, transparent);
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.14), rgba(0, 209, 255, 0.1));
+}
+
+.stepButton.active {
+  border-color: color-mix(in srgb, #5f5bff 85%, transparent);
+  box-shadow: 0 12px 30px rgba(22, 32, 84, 0.25);
+}
+
+.stepButton.upcoming {
+  opacity: 0.85;
+}
+
+.stepContent {
+  display: grid;
+  gap: 1rem;
+}
+
+.errorBanner {
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 120, 120, 0.4);
+  background: rgba(255, 105, 105, 0.16);
+  color: #ffecec;
+  font-size: 0.9rem;
+}
+
+.stepCard {
+  display: grid;
+  gap: clamp(1rem, 3vw, 1.75rem);
+  padding: clamp(1rem, 3vw, 1.8rem);
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+
+.stepHeader h3 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.stepHeader p {
+  margin: 0.4rem 0 0;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  line-height: 1.6;
+}
+
+.privacyGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.toggleRow strong {
+  font-size: 0.95rem;
+}
+
+.toggleRow small {
+  display: block;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--foreground) 58%, transparent);
+}
+
+.toggleRow input[type="checkbox"] {
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.fieldGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.selectField {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.fieldGrid input,
+.fieldGrid select,
+.fullWidthField input,
+.fullWidthField textarea,
+.allowListRow input,
+.selectField select,
+.selectField input,
+.choiceGroup textarea {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: color-mix(in srgb, var(--foreground) 3%, transparent);
+  padding: 0.65rem 0.8rem;
+  color: inherit;
+  font: inherit;
+}
+
+.fullWidthField {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.fullWidthField textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.allowListRow {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.allowListRow span {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 58%, transparent);
+}
+
+.previewCard {
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--foreground) 6%, transparent), transparent 70%);
+  padding: 1.1rem 1.35rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.previewCard h4 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.previewCard ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+}
+
+.previewCard li strong {
+  display: block;
+  color: color-mix(in srgb, var(--foreground) 82%, transparent);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.choiceGroup {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.choiceGroup h4 {
+  margin: 0;
+}
+
+.choiceGroup p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 64%, transparent);
+}
+
+.choiceGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.choice input {
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.choiceActive {
+  border-color: color-mix(in srgb, #5f5bff 75%, transparent);
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.18), rgba(0, 209, 255, 0.16));
+  transform: translateY(-1px);
+}
+
+.intentGroup {
+  display: grid;
+  gap: 0.9rem;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.intentGroup legend {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 64%, transparent);
+}
+
+.intentGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.intentOption {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.intentOption strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.intentOption small {
+  display: block;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+  line-height: 1.5;
+}
+
+.intentOption input {
+  inline-size: 18px;
+  block-size: 18px;
+  margin-top: 0.2rem;
+}
+
+.actionRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.primaryAction {
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 1.6rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #5f5bff, #00d1ff);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.primaryAction:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.primaryAction:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(60, 86, 190, 0.25);
+}
+
+.completionSummary {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, #5f5bff 35%, transparent);
+  background: linear-gradient(140deg, rgba(95, 91, 255, 0.18), rgba(0, 209, 255, 0.12));
+  color: color-mix(in srgb, var(--foreground) 88%, transparent);
+  font-size: 0.9rem;
+}
+
+.completionSummary strong {
+  font-size: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+
+  .stepList {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 0.4rem;
+  }
+
+  .stepList li {
+    flex: 0 0 auto;
+    min-width: 220px;
+  }
+}
+
+@media (max-width: 640px) {
+  .wizard {
+    padding: 1.25rem;
+  }
+
+  .actionRow {
+    justify-content: stretch;
+  }
+
+  .primaryAction {
+    width: 100%;
+  }
+}
+
