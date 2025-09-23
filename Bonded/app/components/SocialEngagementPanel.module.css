@@ -1,0 +1,465 @@
+.container {
+  display: grid;
+  gap: 2.5rem;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border-radius: 28px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--foreground) 4%, transparent), transparent 70%);
+  box-shadow: 0 32px 64px rgba(10, 16, 56, 0.16);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header h2 {
+  font-size: clamp(1.8rem, 3vw, 2.3rem);
+  letter-spacing: -0.01em;
+}
+
+.header p {
+  max-width: 520px;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stats span {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.stats small {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.grid {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 960px) {
+  .grid {
+    grid-template-columns: 1.4fr 1fr;
+  }
+
+  .successStories,
+  .leaderboards {
+    grid-column: 2;
+  }
+
+  .referral {
+    grid-column: 1 / -1;
+  }
+}
+
+.sectionHeader {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.sectionHeader span {
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  font-size: 0.95rem;
+}
+
+.achievementList {
+  display: grid;
+  gap: 1.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.achievementCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.1rem;
+  padding: 1.1rem 1.35rem;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.badgeIcon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.12), rgba(0, 209, 255, 0.12));
+}
+
+.achievementContent {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.achievementHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.achievementHeader strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.achievementHeader span {
+  display: block;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  font-size: 0.95rem;
+}
+
+.rarity {
+  align-self: flex-start;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid transparent;
+}
+
+.rarity-core {
+  border-color: rgba(95, 91, 255, 0.35);
+  background: rgba(95, 91, 255, 0.12);
+}
+
+.rarity-elite {
+  border-color: rgba(0, 209, 255, 0.35);
+  background: rgba(0, 209, 255, 0.12);
+}
+
+.rarity-legendary {
+  border-color: rgba(255, 215, 111, 0.45);
+  background: rgba(255, 215, 111, 0.2);
+}
+
+.achievementMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.5rem;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  font-size: 0.9rem;
+}
+
+.shareRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shareLabel {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.shareActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.shareButton {
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.18), rgba(0, 209, 255, 0.18));
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.shareButton:hover {
+  transform: translateY(-1px);
+}
+
+.successStories ul,
+.leaderboards ol,
+.ledger {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.storyCard {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.1rem 1.3rem;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+
+.storyCard header span {
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  font-size: 0.95rem;
+}
+
+.storyCard blockquote {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--foreground) 75%, transparent);
+}
+
+.storyCard footer {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.storyCard footer span {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+}
+
+.storyCard footer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+.storyCard footer li {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 100px;
+}
+
+.storyCard footer li span {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.leaderboardGrid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.leaderboardCard {
+  display: grid;
+  gap: 1rem;
+  padding: 1.1rem 1.35rem;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.leaderboardCard header span {
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  font-size: 0.95rem;
+}
+
+.leaderboardCard li {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.leaderboardCard li:first-child {
+  border-top: none;
+  padding-top: 0.25rem;
+}
+
+.entryMeta {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.rank {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.entryMeta span {
+  display: block;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  font-size: 0.9rem;
+}
+
+.entryStats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.rankDelta {
+  font-weight: 600;
+}
+
+.rankDelta[data-delta="-1"],
+.rankDelta[data-delta="0"] {
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.rankDelta[data-delta="1"] {
+  color: #2fe4bc;
+}
+
+.referralCard {
+  display: grid;
+  gap: 1rem;
+  padding: 1.2rem 1.5rem;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.referralHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.referralHeader span {
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  font-size: 0.9rem;
+}
+
+.referralCard code {
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  font-size: 0.85rem;
+}
+
+.referralCard p {
+  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+  line-height: 1.6;
+}
+
+.progressTrack {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 10%, transparent);
+  overflow: hidden;
+}
+
+.progressValue {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #5f5bff, #00d1ff);
+  border-radius: inherit;
+}
+
+.bonus {
+  padding: 0.65rem 0.85rem;
+  border-radius: 16px;
+  background: rgba(255, 215, 111, 0.14);
+  border: 1px solid rgba(255, 215, 111, 0.35);
+  color: #ffd76f;
+  font-weight: 600;
+}
+
+.ledger li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.ledger li:first-child {
+  border-top: none;
+  padding-top: 0.35rem;
+}
+
+.ledger span {
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  font-size: 0.9rem;
+}
+
+.ledger time {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.referralLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.22), rgba(0, 209, 255, 0.22));
+  color: #fff;
+  font-weight: 600;
+}
+
+.toast {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  width: fit-content;
+  box-shadow: 0 22px 44px rgba(12, 14, 55, 0.18);
+}
+
+.toast span {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+}

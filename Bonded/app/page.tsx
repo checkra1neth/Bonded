@@ -18,6 +18,7 @@ import { ChatInterface } from "./components/ChatInterface";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { ProfileManagementPanel } from "./components/ProfileManagementPanel";
 import { ChallengeEventHub } from "./components/ChallengeEventHub";
+import { SocialEngagementPanel } from "./components/SocialEngagementPanel";
 import styles from "./page.module.css";
 import { useMatchQueue } from "./hooks/useMatchQueue";
 import { useIcebreakerSuggestions } from "./hooks/useIcebreakerSuggestions";
@@ -441,6 +442,10 @@ export default function Home() {
               seekerPortfolio={seekerProfile.portfolio}
               candidatesById={candidatesById}
             />
+          </section>
+
+          <section className={styles.socialSection}>
+            <SocialEngagementPanel />
           </section>
         </div>
 
