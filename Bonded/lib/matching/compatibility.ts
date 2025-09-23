@@ -74,12 +74,30 @@ export interface CompatibilityScore {
   factors: CompatibilityFactor[];
 }
 
+export type MatchDecision = "pass" | "like" | "super";
+
+export interface CandidateInteractionProfile {
+  /**
+   * Indicates whether the candidate has already made an implicit decision about the seeker.
+   * Only considered when the seeker responds with a positive decision.
+   */
+  initialDecision?: MatchDecision;
+  /**
+   * Determines how the candidate responds when the seeker expresses interest.
+   */
+  autoResponse?: {
+    onLike?: MatchDecision;
+    onSuperLike?: MatchDecision;
+  };
+}
+
 export interface MatchCandidate {
   user: UserProfile;
   compatibilityScore: CompatibilityScore;
   sharedInterests: SharedInterest[];
   icebreakers: string[];
   personality: PersonalityAssessment;
+  interaction?: CandidateInteractionProfile;
 }
 
 export const SCORE_WEIGHTS = {
@@ -554,14 +572,20 @@ export function calculateCompatibility(
   };
 }
 
+export interface BuildMatchCandidateOptions {
+  interaction?: CandidateInteractionProfile;
+}
+
 export function buildMatchCandidate(
   seeker: CompatibilityProfile,
   candidate: CompatibilityProfile,
+  options: BuildMatchCandidateOptions = {},
 ): MatchCandidate {
   const score = calculateCompatibility(seeker, candidate);
   const sharedInterests = buildSharedInterests(seeker.portfolio, candidate.portfolio);
   const icebreakers = generateIcebreakers(sharedInterests, score.category);
   const personality = assessPersonality(candidate.portfolio);
+  const { interaction } = options;
   const user: UserProfile = {
     ...candidate.user,
     personality: personality.type,
@@ -573,6 +597,7 @@ export function buildMatchCandidate(
     sharedInterests,
     icebreakers,
     personality,
+    interaction,
   };
 }
 

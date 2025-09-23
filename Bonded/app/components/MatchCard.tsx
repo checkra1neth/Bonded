@@ -1,8 +1,8 @@
-import styles from "./MatchCard.module.css";
-import type { MatchCandidate } from "@/lib/matching/compatibility";
-import { PersonalityHighlight } from "./PersonalityHighlight";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 
-export type MatchDecision = "pass" | "like" | "super";
+import styles from "./MatchCard.module.css";
+import type { MatchCandidate, MatchDecision } from "@/lib/matching/compatibility";
+import { PersonalityHighlight } from "./PersonalityHighlight";
 
 interface MatchCardProps {
   candidate: MatchCandidate;
@@ -16,6 +16,31 @@ const DECISION_COPY: Record<MatchDecision, { label: string; emoji: string }> = {
   super: { label: "Super Like", emoji: "🚀" },
 };
 
+const HORIZONTAL_THRESHOLD = 120;
+const VERTICAL_THRESHOLD = 140;
+const INTENT_PREVIEW_THRESHOLD = 45;
+const EXIT_TRANSFORMS: Record<MatchDecision, { x: number; y: number }> = {
+  pass: { x: -560, y: -40 },
+  like: { x: 560, y: -40 },
+  super: { x: 0, y: -640 },
+};
+
+type DragState = {
+  active: boolean;
+  startX: number;
+  startY: number;
+  x: number;
+  y: number;
+};
+
+const initialDragState: DragState = {
+  active: false,
+  startX: 0,
+  startY: 0,
+  x: 0,
+  y: 0,
+};
+
 export function MatchCard({ candidate, isActive = false, onDecision }: MatchCardProps) {
   const initials = candidate.user.displayName
     .split(" ")
@@ -26,8 +51,173 @@ export function MatchCard({ candidate, isActive = false, onDecision }: MatchCard
 
   const score = Math.round(candidate.compatibilityScore.overall * 100);
 
+  const [drag, setDrag] = useState<DragState>(initialDragState);
+  const [intent, setIntent] = useState<MatchDecision | null>(null);
+  const [outcome, setOutcome] = useState<MatchDecision | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const pointerIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    pointerIdRef.current = null;
+    setDrag(() => ({ ...initialDragState }));
+    setIntent(null);
+    setOutcome(null);
+  }, [candidate.user.id]);
+
+  const calculateIntent = (x: number, y: number): MatchDecision | null => {
+    if (x > INTENT_PREVIEW_THRESHOLD) {
+      return "like";
+    }
+    if (x < -INTENT_PREVIEW_THRESHOLD) {
+      return "pass";
+    }
+    if (-y > INTENT_PREVIEW_THRESHOLD && Math.abs(y) > Math.abs(x)) {
+      return "super";
+    }
+    return null;
+  };
+
+  const determineDecision = (x: number, y: number): MatchDecision | null => {
+    if (x > HORIZONTAL_THRESHOLD) {
+      return "like";
+    }
+    if (x < -HORIZONTAL_THRESHOLD) {
+      return "pass";
+    }
+    if (-y > VERTICAL_THRESHOLD) {
+      return "super";
+    }
+    return null;
+  };
+
+  const triggerDecision = (decision: MatchDecision) => {
+    if (!onDecision || outcome) {
+      return;
+    }
+
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+    }
+
+    setIntent(decision);
+    setOutcome(decision);
+    setDrag({
+      active: false,
+      startX: 0,
+      startY: 0,
+      x: EXIT_TRANSFORMS[decision].x,
+      y: EXIT_TRANSFORMS[decision].y,
+    });
+
+    timeoutRef.current = window.setTimeout(() => {
+      onDecision(decision);
+    }, 240);
+  };
+
+  const resetDrag = () => {
+    setDrag(() => ({ ...initialDragState }));
+    setIntent(null);
+  };
+
+  const handlePointerDown = (event: PointerEvent<HTMLElement>) => {
+    if (!isActive || outcome) {
+      return;
+    }
+
+    pointerIdRef.current = event.pointerId;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDrag({
+      active: true,
+      startX: event.clientX,
+      startY: event.clientY,
+      x: 0,
+      y: 0,
+    });
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
+    if (!drag.active || pointerIdRef.current !== event.pointerId || outcome) {
+      return;
+    }
+
+    const x = event.clientX - drag.startX;
+    const y = event.clientY - drag.startY;
+    setDrag((current) => ({ ...current, x, y }));
+    setIntent(calculateIntent(x, y));
+  };
+
+  const handlePointerEnd = (event: PointerEvent<HTMLElement>) => {
+    if (!drag.active || pointerIdRef.current !== event.pointerId) {
+      return;
+    }
+
+    pointerIdRef.current = null;
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    const decision = determineDecision(drag.x, drag.y);
+    if (decision) {
+      triggerDecision(decision);
+      return;
+    }
+
+    resetDrag();
+  };
+
+  const handlePointerCancel = (event: PointerEvent<HTMLElement>) => {
+    if (pointerIdRef.current !== event.pointerId) {
+      return;
+    }
+
+    pointerIdRef.current = null;
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    resetDrag();
+  };
+
+  const handleButtonDecision = (decision: MatchDecision) => {
+    triggerDecision(decision);
+  };
+
+  const baseScale = isActive ? 1.01 : 1;
+  const translateY = drag.y + (isActive ? -6 : 0);
+  const transform = `translate3d(${drag.x}px, ${translateY}px, 0) rotate(${drag.x * 0.04}deg) scale(${baseScale})`;
+  const cardStyle: CSSProperties = {
+    transform,
+    transition: drag.active ? "none" : "transform 260ms cubic-bezier(0.22, 1, 0.36, 1)",
+    cursor: isActive ? (drag.active ? "grabbing" : "grab") : "default",
+  };
+
   return (
-    <article className={`${styles.card} ${isActive ? styles.active : ""}`}>
+    <article
+      className={`${styles.card} ${isActive ? styles.active : ""}`}
+      data-intent={intent ?? undefined}
+      data-outcome={outcome ?? undefined}
+      data-dragging={drag.active}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerCancel}
+      style={cardStyle}
+    >
+      <div className={styles.swipeOverlay} data-intent={intent ?? outcome ?? "none"} aria-hidden>
+        <span data-role="like">Like</span>
+        <span data-role="super">Super Like</span>
+        <span data-role="pass">Pass</span>
+      </div>
       <header className={styles.header}>
         <div
           className={styles.avatar}
@@ -95,9 +285,10 @@ export function MatchCard({ candidate, isActive = false, onDecision }: MatchCard
           <button
             key={decision}
             type="button"
-            onClick={() => onDecision?.(decision)}
+            onClick={() => handleButtonDecision(decision)}
             className={styles.actionButton}
             data-variant={decision}
+            disabled={Boolean(outcome)}
           >
             <span aria-hidden>{DECISION_COPY[decision].emoji}</span>
             {DECISION_COPY[decision].label}

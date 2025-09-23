@@ -1,4 +1,5 @@
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
@@ -8,12 +9,87 @@
   padding: clamp(1.5rem, 3vw, 2.25rem);
   box-shadow: 0 32px 80px rgba(10, 15, 40, 0.1);
   backdrop-filter: blur(12px);
-  transition: transform 220ms ease, box-shadow 220ms ease;
+  width: min(100%, 520px);
+  margin: 0 auto;
+  touch-action: pan-y;
+  user-select: none;
+  will-change: transform;
+  transition: box-shadow 220ms ease;
+  overflow: hidden;
 }
 
 .active {
-  transform: translateY(-6px) scale(1.01);
   box-shadow: 0 40px 120px rgba(7, 14, 55, 0.18);
+}
+
+.card[data-dragging="true"] {
+  box-shadow: 0 48px 140px rgba(7, 14, 55, 0.24);
+}
+
+.card[data-outcome] {
+  pointer-events: none;
+}
+
+.swipeOverlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+  padding: 1.25rem clamp(1.25rem, 3vw, 1.75rem);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.swipeOverlay span {
+  justify-self: start;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(18, 23, 64, 0.7);
+  color: #fff;
+  box-shadow: 0 20px 40px rgba(12, 18, 70, 0.32);
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.swipeOverlay span[data-role="super"] {
+  justify-self: center;
+}
+
+.swipeOverlay span[data-role="pass"] {
+  justify-self: end;
+}
+
+.card[data-intent="like"] .swipeOverlay,
+.card[data-intent="pass"] .swipeOverlay,
+.card[data-intent="super"] .swipeOverlay {
+  opacity: 1;
+}
+
+.card[data-intent="like"] .swipeOverlay span[data-role="like"],
+.card[data-intent="pass"] .swipeOverlay span[data-role="pass"],
+.card[data-intent="super"] .swipeOverlay span[data-role="super"] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.card[data-intent="like"] .swipeOverlay span[data-role="like"] {
+  background: rgba(255, 120, 196, 0.85);
+}
+
+.card[data-intent="pass"] .swipeOverlay span[data-role="pass"] {
+  background: rgba(95, 91, 255, 0.8);
+}
+
+.card[data-intent="super"] .swipeOverlay span[data-role="super"] {
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.85), rgba(0, 240, 255, 0.85));
 }
 
 .header {
@@ -182,6 +258,12 @@
   transform: translateY(-2px);
 }
 
+.actionButton:disabled {
+  opacity: 0.6;
+  transform: none;
+  cursor: default;
+}
+
 .actionButton[data-variant="like"] {
   background: linear-gradient(135deg, rgba(255, 85, 153, 0.12), rgba(255, 184, 0, 0.12));
   border-color: rgba(255, 120, 196, 0.5);
@@ -205,5 +287,17 @@
   .avatar {
     width: 64px;
     height: 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .swipeOverlay,
+  .swipeOverlay span,
+  .actionButton {
+    transition: none;
   }
 }

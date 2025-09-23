@@ -144,5 +144,27 @@ describe("buildMatchCandidate", () => {
     expect(match.compatibilityScore.overall).toBeGreaterThan(0.9);
     expect(match.personality.type).toBe(match.user.personality);
     expect(match.personality.scores).toHaveLength(6);
+    expect(match.interaction).toBeUndefined();
+  });
+
+  it("preserves interaction metadata when provided", () => {
+    const seeker = createProfile();
+    const candidate = createProfile({
+      user: {
+        id: "user-3",
+        displayName: "Nova",
+        personality: "Yield Farmer",
+      },
+    });
+
+    const match = buildMatchCandidate(seeker, candidate, {
+      interaction: {
+        initialDecision: "like",
+        autoResponse: { onSuperLike: "super" },
+      },
+    });
+
+    expect(match.interaction?.initialDecision).toBe("like");
+    expect(match.interaction?.autoResponse?.onSuperLike).toBe("super");
   });
 });

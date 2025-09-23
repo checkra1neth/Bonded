@@ -157,6 +157,97 @@
   letter-spacing: 0.08em;
 }
 
+.notifications {
+  display: grid;
+  gap: 1rem;
+  margin: -1rem auto 1.5rem;
+  max-width: 720px;
+}
+
+.notification {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  box-shadow: 0 24px 48px rgba(8, 14, 55, 0.16);
+}
+
+.notification strong {
+  display: block;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.notification span {
+  display: block;
+  font-size: 0.95rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.notification button {
+  border: none;
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.18), rgba(0, 240, 255, 0.18));
+  color: #fff;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.notification button:hover {
+  transform: translateY(-1px);
+}
+
+.deck {
+  position: relative;
+  width: min(100%, 540px);
+  min-height: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardSlot {
+  position: relative;
+  width: 100%;
+  z-index: 1;
+}
+
+.previewCard {
+  position: absolute;
+  inset: clamp(0.75rem, 3vw, 1.5rem);
+  border-radius: 24px;
+  border: 1px dashed color-mix(in srgb, var(--foreground) 16%, transparent);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  display: grid;
+  gap: 0.4rem;
+  place-items: center;
+  text-align: center;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  transform: translateY(18px) scale(0.96);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.previewCard strong {
+  font-size: 1rem;
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
+}
+
+.previewCard span {
+  font-size: 0.9rem;
+}
+
+.deckEmpty {
+  min-height: 420px;
+}
+
 .main {
   display: grid;
   gap: clamp(2rem, 5vw, 3rem);
@@ -164,6 +255,8 @@
 }
 
 .matchSection {
+  display: flex;
+  justify-content: center;
   min-height: 520px;
 }
 
@@ -240,6 +333,52 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.emptyCopy {
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.matchList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.matchList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+
+.matchList strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.matchList span {
+  display: block;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+}
+
+.matchBadge {
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.18), rgba(0, 240, 255, 0.18));
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
 }
 
 .logEmpty {
