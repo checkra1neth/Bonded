@@ -76,7 +76,7 @@
     - Write unit tests for messaging components
     - _Requirements: 3.3, 3.4, 3.5, 8.3_
 
-  - [ ] 5.2 Add advanced chat features
+- [x] 5.2 Add advanced chat features
     - Implement crypto gift sending with Base Pay integration
     - Create portfolio snippet sharing with privacy controls
     - Add challenge invitation system for couples

@@ -12,6 +12,8 @@ import {
 
 import type {
   ChatMessage,
+  ChatMessageKind,
+  ChatMessageMetadata,
   ChatParticipant,
   ChatTypingPayload,
   ClientEvent,
@@ -40,8 +42,14 @@ export interface UseChatSessionResult {
   messages: ChatMessageView[];
   typingUsers: TypingUser[];
   status: ChatConnectionStatus;
-  sendMessage: (body: string) => void;
+  sendMessage: (input: ChatMessageInput) => void;
   notifyTyping: () => void;
+}
+
+export interface ChatMessageInput {
+  body: string;
+  kind?: ChatMessageKind;
+  metadata?: ChatMessageMetadata;
 }
 
 const SOCKET_READY_STATE_OPEN = 1;
@@ -153,10 +161,12 @@ export function useChatSession({
   }, []);
 
   const sendMessage = useCallback(
-    (body: string) => {
-      if (!body.trim() || !participant || !conversationId || !socketRef.current) {
+    (input: ChatMessageInput) => {
+      const trimmed = input.body.trim();
+      if (!trimmed || !participant || !conversationId || !socketRef.current) {
         return;
       }
+      const kind: ChatMessageKind = input.kind ?? "text";
       const socket = socketRef.current;
       const now = Date.now();
       const tempId = crypto.randomUUID();
@@ -167,7 +177,9 @@ export function useChatSession({
         senderId: participant.userId,
         senderName: participant.displayName,
         senderAvatarColor: participant.avatarColor,
-        body,
+        body: trimmed,
+        kind,
+        metadata: input.metadata,
         status: "sent",
         createdAt: now,
         isLocal: true,
@@ -179,7 +191,9 @@ export function useChatSession({
           type: "message",
           conversationId,
           tempId,
-          body,
+          body: trimmed,
+          kind,
+          metadata: input.metadata,
           senderId: participant.userId,
           senderName: participant.displayName,
           senderAvatarColor: participant.avatarColor,

@@ -401,6 +401,7 @@ export default function Home() {
             <ChatInterface
               matches={mutualMatches}
               seeker={seekerParticipant}
+              seekerPortfolio={seekerProfile.portfolio}
               candidatesById={candidatesById}
             />
           </section>

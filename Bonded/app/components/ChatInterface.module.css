@@ -137,6 +137,138 @@
   gap: 1rem;
 }
 
+.quickActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quickActionButton {
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  color: inherit;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.quickActionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quickActionButton:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--foreground) 24%, transparent);
+}
+
+.quickActionButtonActive {
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.12), rgba(0, 209, 255, 0.12));
+  border-color: color-mix(in srgb, var(--foreground) 30%, transparent);
+}
+
+.actionPanel {
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  padding: 1rem 1.25rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.actionHeader strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.actionHeader p {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.actionRow {
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.actionRow label {
+  flex: 1;
+  min-width: 160px;
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.fullWidthField {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.preferenceGrid {
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.preferenceGrid label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.actionPanel input,
+.actionPanel select,
+.actionPanel textarea {
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 16%, transparent);
+  padding: 0.4rem 0.6rem;
+  background: color-mix(in srgb, var(--foreground) 3%, transparent);
+  color: inherit;
+  font: inherit;
+}
+
+.actionPanel textarea {
+  resize: vertical;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.actionButtons button {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 16%, transparent);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  color: inherit;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.actionButtons button[type="submit"] {
+  background: linear-gradient(135deg, #5f5bff, #00d1ff);
+  color: #fff;
+  border-color: transparent;
+}
+
+.actionButtons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.challengeDescription {
+  margin: -0.2rem 0 0;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
 .chatTitle {
   display: flex;
   align-items: center;
@@ -197,6 +329,134 @@
   box-shadow: 0 12px 28px rgba(12, 18, 64, 0.15);
   display: grid;
   gap: 0.5rem;
+}
+
+.messageActions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.actionToggle {
+  border: none;
+  background: color-mix(in srgb, var(--foreground) 10%, transparent);
+  color: inherit;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.actionToggle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.reactionPicker {
+  display: flex;
+  gap: 0.35rem;
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  border-radius: 999px;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--foreground) 16%, transparent);
+}
+
+.reactionPicker button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.reactionRow {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.reactionChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 10%, transparent);
+  font-size: 0.75rem;
+}
+
+.reactionChip small {
+  font-size: 0.65rem;
+}
+
+.giftCard,
+.portfolioCard,
+.challengeCard,
+.voiceCard {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.giftCard strong,
+.portfolioCard strong,
+.challengeCard strong,
+.voiceCard strong {
+  font-size: 0.95rem;
+}
+
+.giftNote {
+  margin: 0;
+  font-style: italic;
+}
+
+.portfolioCard dl {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.portfolioCard dt {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.portfolioCard dd {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.portfolioNote {
+  margin: 0;
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.challengeMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.voiceMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.waveform {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.18rem;
+}
+
+.waveformBar {
+  width: 5px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.8), rgba(0, 209, 255, 0.8));
 }
 
 .messageRow[data-local="true"] .messageBubble {

@@ -1,4 +1,9 @@
-import type { ChatMessage, ChatParticipant } from "./types";
+import type {
+  ChatMessage,
+  ChatMessageKind,
+  ChatMessageMetadata,
+  ChatParticipant,
+} from "./types";
 
 const FALLBACK_RESPONSES = [
   "Love that energy. Want to trade governance alpha sometime soon?",
@@ -112,6 +117,7 @@ export function toDeliveredMessage(
   sender: ChatParticipant,
   body: string,
   timestamp: number,
+  options: { kind?: ChatMessageKind; metadata?: ChatMessageMetadata } = {},
 ): ChatMessage {
   return {
     id: crypto.randomUUID(),
@@ -120,6 +126,8 @@ export function toDeliveredMessage(
     senderName: sender.displayName,
     senderAvatarColor: sender.avatarColor,
     body,
+    kind: options.kind ?? "text",
+    metadata: options.metadata,
     status: "delivered",
     createdAt: timestamp,
     deliveredAt: timestamp,
