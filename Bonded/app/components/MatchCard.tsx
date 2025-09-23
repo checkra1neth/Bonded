@@ -1,5 +1,6 @@
 import styles from "./MatchCard.module.css";
 import type { MatchCandidate } from "@/lib/matching/compatibility";
+import { PersonalityHighlight } from "./PersonalityHighlight";
 
 export type MatchDecision = "pass" | "like" | "super";
 
@@ -48,6 +49,10 @@ export function MatchCard({ candidate, isActive = false, onDecision }: MatchCard
       </header>
 
       <p className={styles.highlight}>{candidate.compatibilityScore.category.highlight}</p>
+
+      <div className={styles.personalitySection}>
+        <PersonalityHighlight assessment={candidate.personality} variant="compact" />
+      </div>
 
       <section className={styles.factors} aria-label="Compatibility breakdown">
         {candidate.compatibilityScore.factors.map((factor) => (

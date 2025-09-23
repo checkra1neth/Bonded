@@ -142,5 +142,7 @@ describe("buildMatchCandidate", () => {
     expect(match.sharedInterests.some((interest) => interest.type === "token")).toBe(true);
     expect(match.icebreakers.length).toBeGreaterThan(0);
     expect(match.compatibilityScore.overall).toBeGreaterThan(0.9);
+    expect(match.personality.type).toBe(match.user.personality);
+    expect(match.personality.scores).toHaveLength(6);
   });
 });

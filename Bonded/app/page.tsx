@@ -7,56 +7,61 @@ import {
   type CompatibilityProfile,
 } from "@/lib/matching/compatibility";
 import { MatchCard, type MatchDecision } from "./components/MatchCard";
+import { PersonalityHighlight } from "./components/PersonalityHighlight";
 import { WalletAuthPanel } from "./components/WalletAuthPanel";
+import { assessPersonality } from "@/lib/personality/assessment";
 import styles from "./page.module.css";
+
+const seekerPortfolio: CompatibilityProfile["portfolio"] = {
+  tokens: [
+    { symbol: "ETH", allocation: 0.32, conviction: "high" },
+    { symbol: "DEGEN", allocation: 0.22, conviction: "medium" },
+    { symbol: "AERO", allocation: 0.16 },
+    { symbol: "USDC", allocation: 0.1 },
+    { symbol: "CBETH", allocation: 0.08 },
+    { symbol: "UNI", allocation: 0.07 },
+    { symbol: "AEROX", allocation: 0.05 },
+  ],
+  defiProtocols: [
+    { name: "Aave", category: "lending", risk: "balanced" },
+    { name: "Aerodrome", category: "dex", risk: "adventurous" },
+    { name: "EigenLayer", category: "staking", risk: "balanced" },
+    { name: "BaseSwap", category: "dex", risk: "adventurous" },
+  ],
+  nftCollections: [
+    { name: "BasePaint", theme: "art", vibe: "cypherpunk" },
+    { name: "Parallel", theme: "gaming", vibe: "luxury" },
+  ],
+  activity: {
+    timezoneOffset: -5,
+    activeHours: [8, 9, 10, 11, 19, 20, 21, 22],
+    tradingFrequency: "daily",
+    riskTolerance: "adventurous",
+  },
+  highlights: ["On-chain since 2018", "Runs a weekly governance call"],
+};
+
+const seekerAssessment = assessPersonality(seekerPortfolio);
 
 const seekerProfile: CompatibilityProfile = {
   user: {
     id: "seeker",
     displayName: "Ava Protocol",
-    personality: "DeFi Degen",
+    personality: seekerAssessment.type,
     basename: "ava.base",
     avatarColor: "linear-gradient(135deg, #5f5bff 0%, #00d1ff 100%)",
     location: "New York • EST",
     achievements: ["Base OG", "DAO Strategist"],
-    bio: "Bridging TradFi intuition with DeFi execution."
+    bio: "Bridging TradFi intuition with DeFi execution.",
   },
-  portfolio: {
-    tokens: [
-      { symbol: "ETH", allocation: 0.32, conviction: "high" },
-      { symbol: "DEGEN", allocation: 0.22, conviction: "medium" },
-      { symbol: "AERO", allocation: 0.16 },
-      { symbol: "USDC", allocation: 0.1 },
-      { symbol: "CBETH", allocation: 0.08 },
-      { symbol: "UNI", allocation: 0.07 },
-      { symbol: "AEROX", allocation: 0.05 },
-    ],
-    defiProtocols: [
-      { name: "Aave", category: "lending", risk: "balanced" },
-      { name: "Aerodrome", category: "dex", risk: "adventurous" },
-      { name: "EigenLayer", category: "staking", risk: "balanced" },
-      { name: "BaseSwap", category: "dex", risk: "adventurous" },
-    ],
-    nftCollections: [
-      { name: "BasePaint", theme: "art", vibe: "cypherpunk" },
-      { name: "Parallel", theme: "gaming", vibe: "luxury" },
-    ],
-    activity: {
-      timezoneOffset: -5,
-      activeHours: [8, 9, 10, 11, 19, 20, 21, 22],
-      tradingFrequency: "daily",
-      riskTolerance: "adventurous",
-    },
-    highlights: ["On-chain since 2018", "Runs a weekly governance call"],
-  },
+  portfolio: seekerPortfolio,
 };
 
-const candidateProfiles: CompatibilityProfile[] = [
+const candidateSeeds = [
   {
     user: {
       id: "nova-yield",
       displayName: "Nova Yield",
-      personality: "Diamond Hands",
       avatarColor: "linear-gradient(135deg, #ff8a8a, #ffd76f)",
       location: "Lisbon • WET",
       bio: "Vault architect turning yield curves into love stories.",
@@ -92,7 +97,6 @@ const candidateProfiles: CompatibilityProfile[] = [
     user: {
       id: "atlas",
       displayName: "Atlas Nodes",
-      personality: "GameFi Player",
       avatarColor: "linear-gradient(135deg, #7fffd4, #3d7afe)",
       location: "Singapore • SGT",
       bio: "Validator runner & metaverse curator on Base.",
@@ -127,7 +131,6 @@ const candidateProfiles: CompatibilityProfile[] = [
     user: {
       id: "serena",
       displayName: "Serena L2",
-      personality: "Banker",
       avatarColor: "linear-gradient(135deg, #ff93ff, #7f5dff)",
       location: "Chicago • CST",
       bio: "Structured products maxi keeping composability classy.",
@@ -158,7 +161,18 @@ const candidateProfiles: CompatibilityProfile[] = [
       },
     },
   },
-];
+] as const;
+
+const candidateProfiles: CompatibilityProfile[] = candidateSeeds.map((candidate) => {
+  const assessment = assessPersonality(candidate.portfolio);
+  return {
+    user: {
+      ...candidate.user,
+      personality: assessment.type,
+    },
+    portfolio: candidate.portfolio,
+  } satisfies CompatibilityProfile;
+});
 
 type DecisionLog = {
   userId: string;
@@ -298,6 +312,7 @@ export default function Home() {
         <aside className={styles.sidebar}>
           <section className={styles.panel}>
             <h3>Your crypto fingerprint</h3>
+            <PersonalityHighlight assessment={seekerAssessment} />
             <ul>
               <li>
                 <strong>Top tokens</strong>
