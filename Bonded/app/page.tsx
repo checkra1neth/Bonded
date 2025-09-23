@@ -15,6 +15,7 @@ import { PersonalityHighlight } from "./components/PersonalityHighlight";
 import { WalletAuthPanel } from "./components/WalletAuthPanel";
 import { IcebreakerSuggestions } from "./components/IcebreakerSuggestions";
 import { ChatInterface } from "./components/ChatInterface";
+import { OnboardingWizard } from "./components/OnboardingWizard";
 import styles from "./page.module.css";
 import { useMatchQueue } from "./hooks/useMatchQueue";
 import { useIcebreakerSuggestions } from "./hooks/useIcebreakerSuggestions";
@@ -350,6 +351,10 @@ export default function Home() {
           </ul>
         </div>
       </header>
+
+      <section className={styles.onboardingSection}>
+        <OnboardingWizard profile={seekerProfile} assessment={seekerAssessment} />
+      </section>
 
       {notifications.length > 0 && (
         <div className={styles.notifications}>
