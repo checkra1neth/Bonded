@@ -1,0 +1,310 @@
+.container {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+  gap: 0;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  overflow: hidden;
+  min-height: 420px;
+}
+
+.emptyState {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.75rem;
+  text-align: center;
+  border-radius: 22px;
+  border: 1px dashed color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.emptyState h3 {
+  margin: 0;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-right: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  padding: 1.5rem;
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h3 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.status {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid color-mix(in srgb, var(--foreground) 16%, transparent);
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.status[data-status="connected"] {
+  color: #1ec970;
+  border-color: rgba(30, 201, 112, 0.3);
+  background: rgba(30, 201, 112, 0.08);
+}
+
+.status[data-status="connecting"] {
+  color: #f3b94d;
+  border-color: rgba(243, 185, 77, 0.4);
+  background: rgba(243, 185, 77, 0.12);
+}
+
+.matchList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.matchButton {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  color: inherit;
+  text-align: left;
+  padding: 0.65rem 0.75rem;
+  border-radius: 16px;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.matchButton:hover {
+  border-color: color-mix(in srgb, var(--foreground) 20%, transparent);
+}
+
+.matchButtonActive {
+  border-color: color-mix(in srgb, var(--foreground) 22%, transparent);
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: linear-gradient(135deg, #5f5bff, #00d1ff);
+}
+
+.matchMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.matchMeta strong {
+  font-size: 0.95rem;
+}
+
+.matchMeta span {
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.chatPanel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.chatHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.chatTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chatTitle strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.chatTitle span {
+  display: block;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.matchBadge {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: linear-gradient(135deg, #5f5bff, #00d1ff);
+  color: #fff;
+}
+
+.messageList {
+  min-height: 260px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+}
+
+.messageList ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.messageRow {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.messageRow[data-local="true"] {
+  justify-content: flex-end;
+}
+
+.messageBubble {
+  max-width: min(420px, 80%);
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  box-shadow: 0 12px 28px rgba(12, 18, 64, 0.15);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.messageRow[data-local="true"] .messageBubble {
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.9), rgba(0, 209, 255, 0.9));
+  color: #fff;
+}
+
+.messageBubble p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.messageMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  gap: 0.75rem;
+}
+
+.messageRow[data-local="true"] .messageMeta {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.typing {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  display: flex;
+  gap: 0.75rem;
+}
+
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.composer textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  resize: none;
+  min-height: 64px;
+  font: inherit;
+  color: inherit;
+}
+
+.composer textarea:focus {
+  outline: none;
+}
+
+.composer button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, #5f5bff, #00d1ff);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.composer button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.composer button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.emptyConversation {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  text-align: center;
+}
+
+@media (max-width: 920px) {
+  .container {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+    flex-direction: row;
+    gap: 1rem;
+    overflow-x: auto;
+  }
+
+  .matchList {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .matchList li {
+    flex: none;
+  }
+
+  .matchButton {
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 160px;
+  }
+}
