@@ -67,7 +67,7 @@
     - _Requirements: 3.1, 3.6_
 
 - [ ] 5. Build real-time chat system
-  - [ ] 5.1 Implement core messaging infrastructure
+  - [x] 5.1 Implement core messaging infrastructure
     - Create Message data models and database schema
     - Implement real-time messaging with WebSocket integration
     - Build ChatInterface component with modern messaging UI

@@ -26,6 +26,18 @@ enum CompatibilityCategory {
   DIFFERENT_STRATEGIES
 }
 
+enum ConversationRole {
+  SEEKER
+  CANDIDATE
+  SYSTEM
+}
+
+enum MessageDeliveryStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
 model User {
   id            String   @id @default(cuid())
   walletAddress String   @unique
@@ -38,6 +50,7 @@ model User {
   portfolio             Portfolio?
   compatibilityAnalyses CompatibilityAnalysis[] @relation("AnalysisOwner")
   compatibilityResults  CompatibilityAnalysis[] @relation("AnalysisTarget")
+  conversations         ConversationParticipant[]
 }
 
 model Portfolio {
@@ -96,4 +109,49 @@ model CompatibilityAnalysis {
   @@index([ownerId], map: "CompatibilityAnalysis_ownerId_idx")
   @@index([targetUserId], map: "CompatibilityAnalysis_targetUserId_idx")
   @@index([portfolioId], map: "CompatibilityAnalysis_portfolioId_idx")
+}
+
+model Conversation {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  lastMessageAt  DateTime?
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String           @id @default(cuid())
+  conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  role           ConversationRole @default(SEEKER)
+  joinedAt       DateTime         @default(now())
+  lastReadAt     DateTime?
+  isTyping       Boolean          @default(false)
+
+  messages Message[]
+
+  @@unique([conversationId, userId])
+  @@index([conversationId], map: "ConversationParticipant_conversationId_idx")
+  @@index([userId], map: "ConversationParticipant_userId_idx")
+}
+
+model Message {
+  id             String                @id @default(cuid())
+  conversation   Conversation          @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
+  sender         ConversationParticipant @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  senderId       String
+  body           String
+  status         MessageDeliveryStatus @default(SENT)
+  deliveredAt    DateTime?
+  readAt         DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@index([conversationId], map: "Message_conversationId_idx")
+  @@index([senderId], map: "Message_senderId_idx")
 }

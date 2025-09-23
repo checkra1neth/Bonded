@@ -14,6 +14,7 @@ import { MatchCard } from "./components/MatchCard";
 import { PersonalityHighlight } from "./components/PersonalityHighlight";
 import { WalletAuthPanel } from "./components/WalletAuthPanel";
 import { IcebreakerSuggestions } from "./components/IcebreakerSuggestions";
+import { ChatInterface } from "./components/ChatInterface";
 import styles from "./page.module.css";
 import { useMatchQueue } from "./hooks/useMatchQueue";
 import { useIcebreakerSuggestions } from "./hooks/useIcebreakerSuggestions";
@@ -237,6 +238,16 @@ export default function Home() {
     );
   }, [queueState.entries]);
 
+  const seekerParticipant = useMemo(
+    () => ({
+      userId: seekerProfile.user.id,
+      displayName: seekerProfile.user.displayName,
+      avatarColor: seekerProfile.user.avatarColor,
+      role: "seeker" as const,
+    }),
+    [],
+  );
+
   const { suggestions: icebreakerSuggestions, isDelivering: isDeliveringIcebreakers } =
     useIcebreakerSuggestions({
       matches: mutualMatches,
@@ -357,33 +368,43 @@ export default function Home() {
       )}
 
       <main className={styles.main}>
-        <section className={styles.matchSection}>
-          <div className={styles.deck}>
-            {nextCandidate ? (
-              <div className={styles.previewCard} aria-hidden>
-                <strong>{nextCandidate.user.displayName}</strong>
-                <span>
-                  {Math.round(nextCandidate.compatibilityScore.overall * 100)}% match • {describeCategory(nextCandidate.compatibilityScore)}
-                </span>
-              </div>
-            ) : null}
-            {activeCandidate ? (
-              <div className={styles.cardSlot}>
-                <MatchCard
-                  key={activeCandidate.user.id}
-                  candidate={activeCandidate}
-                  isActive
-                  onDecision={handleDecision}
-                />
-              </div>
-            ) : (
-              <div className={`${styles.emptyState} ${styles.deckEmpty}`}>
-                <h2>Queue complete</h2>
-                <p>New compatibility scans will refresh once fresh wallets opt in. Stay tuned!</p>
-              </div>
-            )}
-          </div>
-        </section>
+        <div className={styles.primaryColumn}>
+          <section className={styles.matchSection}>
+            <div className={styles.deck}>
+              {nextCandidate ? (
+                <div className={styles.previewCard} aria-hidden>
+                  <strong>{nextCandidate.user.displayName}</strong>
+                  <span>
+                    {Math.round(nextCandidate.compatibilityScore.overall * 100)}% match • {describeCategory(nextCandidate.compatibilityScore)}
+                  </span>
+                </div>
+              ) : null}
+              {activeCandidate ? (
+                <div className={styles.cardSlot}>
+                  <MatchCard
+                    key={activeCandidate.user.id}
+                    candidate={activeCandidate}
+                    isActive
+                    onDecision={handleDecision}
+                  />
+                </div>
+              ) : (
+                <div className={`${styles.emptyState} ${styles.deckEmpty}`}>
+                  <h2>Queue complete</h2>
+                  <p>New compatibility scans will refresh once fresh wallets opt in. Stay tuned!</p>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className={styles.chatSection}>
+            <ChatInterface
+              matches={mutualMatches}
+              seeker={seekerParticipant}
+              candidatesById={candidatesById}
+            />
+          </section>
+        </div>
 
         <aside className={styles.sidebar}>
           <section className={styles.panel}>
