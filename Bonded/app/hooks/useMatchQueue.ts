@@ -6,6 +6,7 @@ import type { MatchCandidate, MatchDecision } from "@/lib/matching/compatibility
 import {
   createMatchQueueState,
   matchQueueReducer,
+  type MatchDecisionRecord,
   type MatchQueueState,
 } from "@/lib/matching/queue";
 
@@ -18,6 +19,7 @@ export type UseMatchQueueResult = {
   dismissNotification: (notificationId: string) => void;
   enqueue: (candidates: MatchCandidate[]) => void;
   reset: (candidates: MatchCandidate[]) => void;
+  undoLastDecision: () => MatchDecisionRecord | null;
 };
 
 export function useMatchQueue(initialCandidates: MatchCandidate[]): UseMatchQueueResult {
@@ -59,6 +61,15 @@ export function useMatchQueue(initialCandidates: MatchCandidate[]): UseMatchQueu
     dispatch({ type: "RESET", candidates });
   }, []);
 
+  const undoLastDecision = useCallback((): MatchDecisionRecord | null => {
+    const lastDecision = state.decisions[state.decisions.length - 1];
+    if (!lastDecision) {
+      return null;
+    }
+    dispatch({ type: "UNDO_LAST" });
+    return lastDecision;
+  }, [state.decisions]);
+
   const activeCandidate =
     state.activeIndex >= 0 ? state.entries[state.activeIndex]?.candidate : undefined;
 
@@ -78,5 +89,6 @@ export function useMatchQueue(initialCandidates: MatchCandidate[]): UseMatchQueu
     dismissNotification,
     enqueue,
     reset,
+    undoLastDecision,
   };
 }

@@ -102,6 +102,34 @@ export function recordDecision(
   };
 }
 
+export function revertDecision(
+  plan: PremiumPlan,
+  usage: PremiumUsageWindow,
+  decision: PremiumDecisionContext["decision"],
+  timestamp: number,
+): PremiumUsageWindow {
+  const normalized = normalizeUsageWindow(usage, timestamp);
+  if (decision === "pass") {
+    return normalized;
+  }
+
+  const unlimitedLikes = hasFeature(plan, "unlimited_likes") && plan.maxDailyLikes === null;
+  const unlimitedSuperLikes = plan.maxDailySuperLikes === null;
+
+  const likes = unlimitedLikes ? normalized.likes : Math.max(0, normalized.likes - 1);
+  const superLikes = unlimitedSuperLikes
+    ? normalized.superLikes
+    : decision === "super"
+    ? Math.max(0, normalized.superLikes - 1)
+    : normalized.superLikes;
+
+  return {
+    windowStart: normalized.windowStart,
+    likes,
+    superLikes,
+  };
+}
+
 export function initializeUsage(timestamp: number): PremiumUsageWindow {
   const { windowStart } = determineUsageWindow(timestamp);
   return { windowStart, likes: 0, superLikes: 0 };

@@ -5,3 +5,5 @@ export * from "./matching";
 export * from "./whoLikedMe";
 export * from "./events";
 export * from "./basePay";
+export * from "./filters";
+export * from "./enhancements";

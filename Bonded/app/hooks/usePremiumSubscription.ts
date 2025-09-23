@@ -6,22 +6,29 @@ import type { MatchDecision } from "@/lib/matching/compatibility";
 import type { MatchQueueState } from "@/lib/matching/queue";
 import {
   BasePaySubscriptionGateway,
+  buildPremiumProfileHighlight,
   evaluateDecision,
+  generateExclusiveContent,
   generateWhoLikedMe,
+  hasFeature,
   initializeUsage,
   partitionEventsForPlan,
   recordDecision,
   resolvePlan,
+  revertDecision,
   type BasePayCheckoutSession,
   type EventPartition,
   type InboundLikeInsight,
   type LikeAllowanceEvaluation,
+  type PremiumContentItem,
   type PremiumPlan,
   type PremiumPlanId,
+  type PremiumProfileHighlight,
   type PremiumSubscription,
   type PremiumUsageWindow,
   type SubscriptionActivationResult,
 } from "@/lib/premium";
+import type { MatchDecisionRecord } from "@/lib/matching/queue";
 import type { ChallengeEvent } from "@/lib/gamification/types";
 
 const DEFAULT_PLAN_ID: PremiumPlanId = "premium_founder";
@@ -44,12 +51,21 @@ export interface UsePremiumSubscriptionResult {
   whoLikedMe: InboundLikeInsight[];
   canSendDecision: (decision: MatchDecision) => LikeAllowanceEvaluation;
   registerDecision: (decision: MatchDecision) => void;
+  undoDecision: (decision: MatchDecisionRecord) => void;
   startCheckout: (request: CheckoutRequestOptions) => Promise<SubscriptionActivationResult>;
   checkoutSession: BasePayCheckoutSession | null;
   subscription: PremiumSubscription | null;
   isProcessingCheckout: boolean;
   checkoutError: string | null;
   partitionEvents: (events: ChallengeEvent[]) => EventPartition;
+  features: {
+    hasAdvancedFilters: boolean;
+    hasUndo: boolean;
+    hasSuperLikeSpotlight: boolean;
+    hasExclusiveContent: boolean;
+  };
+  profileHighlight: PremiumProfileHighlight | null;
+  exclusiveContent: PremiumContentItem[];
 }
 
 const APP_ID = process.env.NEXT_PUBLIC_BASE_PAY_APP_ID ?? "bonded-app";
@@ -88,6 +104,13 @@ export function usePremiumSubscription(
   const registerDecision = useCallback(
     (decision: MatchDecision) => {
       setUsage((current) => recordDecision(plan, current, decision, Date.now()));
+    },
+    [plan],
+  );
+
+  const undoDecision = useCallback(
+    (decision: MatchDecisionRecord) => {
+      setUsage((current) => revertDecision(plan, current, decision.decision, decision.createdAt));
     },
     [plan],
   );
@@ -131,6 +154,25 @@ export function usePremiumSubscription(
     [plan],
   );
 
+  const features = useMemo(
+    () => ({
+      hasAdvancedFilters: hasFeature(plan, "advanced_filters"),
+      hasUndo: hasFeature(plan, "undo_swipe"),
+      hasSuperLikeSpotlight: hasFeature(plan, "super_like_spotlight"),
+      hasExclusiveContent: hasFeature(plan, "exclusive_content"),
+    }),
+    [plan],
+  );
+
+  const profileHighlight = useMemo<PremiumProfileHighlight | null>(() => {
+    if (!hasFeature(plan, "profile_highlighting")) {
+      return null;
+    }
+    return buildPremiumProfileHighlight(plan);
+  }, [plan]);
+
+  const exclusiveContent = useMemo<PremiumContentItem[]>(() => generateExclusiveContent(plan), [plan]);
+
   return {
     plan,
     allowance,
@@ -138,11 +180,15 @@ export function usePremiumSubscription(
     whoLikedMe,
     canSendDecision,
     registerDecision,
+    undoDecision,
     startCheckout,
     checkoutSession,
     subscription,
     isProcessingCheckout,
     checkoutError,
     partitionEvents,
+    features,
+    profileHighlight,
+    exclusiveContent,
   };
 }

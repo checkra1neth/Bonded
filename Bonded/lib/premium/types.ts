@@ -6,7 +6,11 @@ export type PremiumFeature =
   | "advanced_filters"
   | "who_liked_me"
   | "priority_matching"
-  | "exclusive_events";
+  | "exclusive_events"
+  | "undo_swipe"
+  | "super_like_spotlight"
+  | "profile_highlighting"
+  | "exclusive_content";
 
 export type PremiumPlanId = "free" | "premium_founder" | "premium_partner";
 

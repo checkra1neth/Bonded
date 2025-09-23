@@ -26,6 +26,41 @@
   color: color-mix(in srgb, var(--foreground) 70%, transparent);
 }
 
+.premiumHighlight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(95, 91, 255, 0.25);
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.18), rgba(0, 209, 255, 0.12));
+  color: color-mix(in srgb, var(--foreground) 75%, transparent);
+}
+
+.premiumHighlight strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.premiumHighlight p {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+}
+
+.premiumBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(95, 91, 255, 0.18);
+}
+
 .status {
   display: grid;
   gap: 0.25rem;

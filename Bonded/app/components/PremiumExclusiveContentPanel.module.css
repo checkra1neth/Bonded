@@ -1,0 +1,75 @@
+.container {
+  display: grid;
+  gap: 1rem;
+  padding: 1.3rem 1.4rem;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: linear-gradient(150deg, rgba(95, 91, 255, 0.08), rgba(0, 209, 255, 0.06));
+}
+
+.container h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.list li {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--foreground) 18%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.tag {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(95, 91, 255, 0.18);
+  color: rgba(95, 91, 255, 0.9);
+}
+
+.availability[data-state="available"] {
+  color: rgba(0, 209, 255, 0.95);
+}
+
+.availability[data-state="coming_soon"] {
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.list strong {
+  font-size: 0.95rem;
+}
+
+.list p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.empty {
+  padding: 1.25rem 1.4rem;
+  border-radius: 18px;
+  border: 1px dashed color-mix(in srgb, var(--foreground) 18%, transparent);
+  text-align: center;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+}

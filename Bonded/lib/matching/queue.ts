@@ -56,7 +56,8 @@ export type MatchQueueAction =
   | { type: "DECIDE"; candidateId: string; decision: MatchDecision; timestamp?: number }
   | { type: "DISMISS_NOTIFICATION"; notificationId: string }
   | { type: "ENQUEUE"; candidates: MatchCandidate[]; timestamp?: number }
-  | { type: "RESET"; candidates: MatchCandidate[] };
+  | { type: "RESET"; candidates: MatchCandidate[] }
+  | { type: "UNDO_LAST" };
 
 const DECISION_PREFIX = "decision";
 const MATCH_PREFIX = "match";
@@ -244,6 +245,57 @@ export function matchQueueReducer(
 
     case "RESET": {
       return createMatchQueueState(action.candidates);
+    }
+
+    case "UNDO_LAST": {
+      const lastDecision = state.decisions[state.decisions.length - 1];
+      if (!lastDecision) {
+        return state;
+      }
+
+      const entryIndex = state.entries.findIndex(
+        (entry) => entry.candidate.user.id === lastDecision.candidateId,
+      );
+
+      if (entryIndex === -1) {
+        return state;
+      }
+
+      const entries = state.entries.map((entry, index) => {
+        if (index !== entryIndex) {
+          return entry;
+        }
+        return {
+          candidate: entry.candidate,
+          status: "pending" as const,
+        } satisfies MatchQueueEntry;
+      });
+
+      const decisions = state.decisions.slice(0, -1);
+
+      const matches = state.matches.filter(
+        (match) =>
+          !(match.candidateId === lastDecision.candidateId && match.createdAt === lastDecision.createdAt),
+      );
+
+      const notifications = state.notifications.filter(
+        (notification) =>
+          !(
+            notification.data.candidateId === lastDecision.candidateId &&
+            notification.createdAt === lastDecision.createdAt
+          ),
+      );
+
+      const exhausted = entries.every((entry) => entry.status === "decided");
+
+      return {
+        entries,
+        activeIndex: exhausted ? -1 : entryIndex,
+        decisions,
+        matches,
+        notifications,
+        exhausted,
+      };
     }
 
     default:
