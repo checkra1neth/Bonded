@@ -7,14 +7,10 @@ import type {
   TokenHolding,
   TradingFrequency,
 } from "../portfolio/types";
+import { assessPersonality } from "../personality/assessment";
+import type { CryptoPersonalityType, PersonalityAssessment } from "../personality/types";
 
-type Personality =
-  | "Banker"
-  | "DeFi Degen"
-  | "NFT Collector"
-  | "GameFi Player"
-  | "Diamond Hands"
-  | "Day Trader";
+type Personality = CryptoPersonalityType;
 
 export type {
   ActivityPattern,
@@ -83,6 +79,7 @@ export interface MatchCandidate {
   compatibilityScore: CompatibilityScore;
   sharedInterests: SharedInterest[];
   icebreakers: string[];
+  personality: PersonalityAssessment;
 }
 
 export const SCORE_WEIGHTS = {
@@ -564,12 +561,18 @@ export function buildMatchCandidate(
   const score = calculateCompatibility(seeker, candidate);
   const sharedInterests = buildSharedInterests(seeker.portfolio, candidate.portfolio);
   const icebreakers = generateIcebreakers(sharedInterests, score.category);
+  const personality = assessPersonality(candidate.portfolio);
+  const user: UserProfile = {
+    ...candidate.user,
+    personality: personality.type,
+  };
 
   return {
-    user: candidate.user,
+    user,
     compatibilityScore: score,
     sharedInterests,
     icebreakers,
+    personality,
   };
 }
 

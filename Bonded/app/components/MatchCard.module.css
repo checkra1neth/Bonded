@@ -72,6 +72,10 @@
   color: color-mix(in srgb, var(--foreground) 75%, transparent);
 }
 
+.personalitySection {
+  display: grid;
+}
+
 .factors {
   display: grid;
   gap: 1rem;
