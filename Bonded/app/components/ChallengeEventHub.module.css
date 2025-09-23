@@ -258,6 +258,12 @@
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
+.lockedNotice {
+  margin: 0;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
 .eventCard {
   display: grid;
   gap: 0.75rem;

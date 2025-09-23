@@ -90,6 +90,12 @@ enum MessageDeliveryStatus {
   READ
 }
 
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  INCOMPLETE
+}
+
 model User {
   id            String   @id @default(cuid())
   walletAddress String   @unique
@@ -103,6 +109,7 @@ model User {
   compatibilityAnalyses CompatibilityAnalysis[] @relation("AnalysisOwner")
   compatibilityResults  CompatibilityAnalysis[] @relation("AnalysisTarget")
   conversations         ConversationParticipant[]
+  premiumSubscriptions  PremiumSubscription[]
 }
 
 model Portfolio {
@@ -206,6 +213,23 @@ model Message {
 
   @@index([conversationId], map: "Message_conversationId_idx")
   @@index([senderId], map: "Message_senderId_idx")
+}
+
+model PremiumSubscription {
+  id              String             @id @default(cuid())
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  planId          String
+  walletAddress   String
+  status          SubscriptionStatus @default(INCOMPLETE)
+  startedAt       DateTime
+  renewsAt        DateTime
+  paymentReference String
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([userId], map: "PremiumSubscription_userId_idx")
+  @@index([walletAddress], map: "PremiumSubscription_walletAddress_idx")
 }
 
 model Challenge {
