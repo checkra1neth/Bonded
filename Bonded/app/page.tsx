@@ -6,14 +6,17 @@ import {
   describeCategory,
   type CandidateInteractionProfile,
   type CompatibilityProfile,
+  type MatchCandidate,
   type MatchDecision,
 } from "@/lib/matching/compatibility";
+import { assessPersonality } from "@/lib/personality/assessment";
 import { MatchCard } from "./components/MatchCard";
 import { PersonalityHighlight } from "./components/PersonalityHighlight";
 import { WalletAuthPanel } from "./components/WalletAuthPanel";
-import { assessPersonality } from "@/lib/personality/assessment";
+import { IcebreakerSuggestions } from "./components/IcebreakerSuggestions";
 import styles from "./page.module.css";
 import { useMatchQueue } from "./hooks/useMatchQueue";
+import { useIcebreakerSuggestions } from "./hooks/useIcebreakerSuggestions";
 
 const seekerPortfolio: CompatibilityProfile["portfolio"] = {
   tokens: [
@@ -191,6 +194,10 @@ const candidateProfiles: CompatibilityProfile[] = candidateSeeds.map((candidate)
   } satisfies CompatibilityProfile;
 });
 
+const candidateProfilesById = new Map<string, CompatibilityProfile>(
+  candidateProfiles.map((profile) => [profile.user.id, profile]),
+);
+
 export default function Home() {
   const initialCandidates = useMemo(
     () =>
@@ -215,6 +222,28 @@ export default function Home() {
   const decisionLog = [...queueState.decisions].sort((a, b) => b.createdAt - a.createdAt);
   const mutualMatches = [...queueState.matches].sort((a, b) => b.createdAt - a.createdAt);
   const notifications = queueState.notifications;
+
+  const candidatesById = useMemo(() => {
+    return queueState.entries.reduce(
+      (acc, entry) => {
+        const profile = candidateProfilesById.get(entry.candidate.user.id);
+        acc.set(entry.candidate.user.id, {
+          candidate: entry.candidate,
+          portfolio: profile?.portfolio,
+        });
+        return acc;
+      },
+      new Map<string, { candidate: MatchCandidate; portfolio?: CompatibilityProfile["portfolio"] }>(),
+    );
+  }, [queueState.entries]);
+
+  const { suggestions: icebreakerSuggestions, isDelivering: isDeliveringIcebreakers } =
+    useIcebreakerSuggestions({
+      matches: mutualMatches,
+      seekerProfile,
+      seekerPersonality: seekerAssessment,
+      candidatesById,
+    });
 
   const nextCandidate = queueState.entries.find((entry, index) => {
     if (queueState.activeIndex === -1) {
@@ -384,6 +413,14 @@ export default function Home() {
                 <span>Evenings EST • Governance calls Wednesdays</span>
               </li>
             </ul>
+          </section>
+
+          <section className={styles.panel}>
+            <IcebreakerSuggestions
+              matches={mutualMatches}
+              suggestions={icebreakerSuggestions}
+              isGenerating={isDeliveringIcebreakers}
+            />
           </section>
 
           <section className={styles.panel}>
