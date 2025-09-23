@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   buildMatchCandidate,
   describeCategory,
@@ -20,12 +20,38 @@ import { OnboardingWizard } from "./components/OnboardingWizard";
 import { ProfileManagementPanel } from "./components/ProfileManagementPanel";
 import { ChallengeEventHub } from "./components/ChallengeEventHub";
 import { SocialEngagementPanel } from "./components/SocialEngagementPanel";
+import { PremiumFiltersPanel } from "./components/PremiumFiltersPanel";
+import { PremiumSuperLikeSpotlight } from "./components/PremiumSuperLikeSpotlight";
+import { PremiumExclusiveContentPanel } from "./components/PremiumExclusiveContentPanel";
 import styles from "./page.module.css";
 import { useMatchQueue } from "./hooks/useMatchQueue";
 import { usePremiumSubscription } from "./hooks/usePremiumSubscription";
 import { useChallengeHub } from "./hooks/useChallengeHub";
-import { prioritizeCandidates, resolvePlan } from "@/lib/premium";
+import {
+  buildPremiumFilterFacets,
+  buildSuperLikeSpotlightEntry,
+  filterCandidates,
+  hasFeature,
+  prioritizeCandidates,
+  resolvePlan,
+  summarizeFilters,
+  type PremiumFilterOptions,
+  type SuperLikeSpotlightEntry,
+} from "@/lib/premium";
 import { useIcebreakerSuggestions } from "./hooks/useIcebreakerSuggestions";
+
+const SPOTLIGHT_LIMIT = 4;
+
+const createDefaultPremiumFilters = (): PremiumFilterOptions => ({
+  searchTerm: "",
+  minScore: 0,
+  categories: [],
+  tokenSymbols: [],
+  defiProtocols: [],
+  activityFocus: [],
+  personalities: [],
+  warmSignalsOnly: false,
+});
 
 const seekerPortfolio: CompatibilityProfile["portfolio"] = {
   tokens: [
@@ -241,16 +267,58 @@ export default function Home() {
     [],
   );
 
+  const [premiumFilters, setPremiumFilters] = useState<PremiumFilterOptions>(
+    createDefaultPremiumFilters,
+  );
+  const [superLikeSpotlight, setSuperLikeSpotlight] = useState<SuperLikeSpotlightEntry[]>([]);
+
   const premiumPlan = useMemo(() => resolvePlan("premium_founder"), []);
+  const advancedFiltersEnabled = useMemo(
+    () => hasFeature(premiumPlan, "advanced_filters"),
+    [premiumPlan],
+  );
 
   const prioritizedCandidates = useMemo(
     () => prioritizeCandidates(initialCandidates, premiumPlan),
     [initialCandidates, premiumPlan],
   );
 
-  const { state: queueState, activeCandidate, decide, dismissNotification, reviewedCount } =
-    useMatchQueue(prioritizedCandidates);
+  const filterFacets = useMemo(
+    () => buildPremiumFilterFacets(prioritizedCandidates),
+    [prioritizedCandidates],
+  );
 
+  const filteredCandidates = useMemo(
+    () =>
+      advancedFiltersEnabled
+        ? filterCandidates(prioritizedCandidates, premiumFilters)
+        : prioritizedCandidates,
+    [advancedFiltersEnabled, prioritizedCandidates, premiumFilters],
+  );
+
+  const filterSummary = useMemo(() => summarizeFilters(premiumFilters), [premiumFilters]);
+
+  const handleFiltersChange = useCallback(
+    (nextFilters: PremiumFilterOptions) => {
+      setPremiumFilters(nextFilters);
+    },
+    [],
+  );
+
+  const handleResetFilters = useCallback(() => {
+    setPremiumFilters(createDefaultPremiumFilters());
+  }, []);
+
+  const {
+    state: queueState,
+    activeCandidate,
+    decide,
+    dismissNotification,
+    reviewedCount,
+    undoLastDecision,
+  } = useMatchQueue(filteredCandidates);
+
+  const filteredCount = filteredCandidates.length;
   const totalCandidates = queueState.entries.length;
   const progress = totalCandidates
     ? Math.round((reviewedCount / totalCandidates) * 100)
@@ -297,6 +365,14 @@ export default function Home() {
   const premium = usePremiumSubscription({ planId: premiumPlan.id, queueState });
   const [premiumNotice, setPremiumNotice] = useState<string | null>(null);
 
+  const showFilters = premium.features.hasAdvancedFilters;
+  const showSpotlight = premium.features.hasSuperLikeSpotlight;
+  const showExclusiveContent = premium.features.hasExclusiveContent;
+  const canUndo = premium.features.hasUndo && queueState.decisions.length > 0;
+  const undoHelperText = canUndo
+    ? "Revisit your previous match instantly."
+    : "Swipe to enable undo.";
+
   const challengeView = useChallengeHub();
   const eventPartition = useMemo(
     () => premium.partitionEvents(challengeView.events),
@@ -310,6 +386,20 @@ export default function Home() {
     return entry.status === "pending" && index > queueState.activeIndex;
   })?.candidate;
 
+  const handleUndoLast = () => {
+    const lastDecision = undoLastDecision();
+    if (!lastDecision) {
+      return;
+    }
+    premium.undoDecision(lastDecision);
+    if (lastDecision.decision === "super") {
+      setSuperLikeSpotlight((current) =>
+        current.filter((entry) => entry.candidateId !== lastDecision.candidateId),
+      );
+    }
+    setPremiumNotice(null);
+  };
+
   const handleDecision = (decision: MatchDecision) => {
     if (!activeCandidate) {
       return;
@@ -322,6 +412,17 @@ export default function Home() {
     }
 
     setPremiumNotice(null);
+
+    if (decision === "super" && premium.features.hasSuperLikeSpotlight) {
+      const entry = buildSuperLikeSpotlightEntry(activeCandidate, Date.now());
+      setSuperLikeSpotlight((current) => {
+        const withoutCandidate = current.filter(
+          (existing) => existing.candidateId !== entry.candidateId,
+        );
+        return [entry, ...withoutCandidate].slice(0, SPOTLIGHT_LIMIT);
+      });
+    }
+
     premium.registerDecision(decision);
     decide(activeCandidate.user.id, decision);
   };
@@ -429,7 +530,10 @@ export default function Home() {
       <main className={styles.main}>
         <div className={styles.primaryColumn}>
           <section className={styles.profileSection}>
-            <ProfileManagementPanel profile={seekerProfile} />
+            <ProfileManagementPanel
+              profile={seekerProfile}
+              premiumHighlight={premium.profileHighlight}
+            />
           </section>
           <section className={styles.matchSection}>
             {premiumNotice ? (
@@ -438,6 +542,14 @@ export default function Home() {
                 <button type="button" onClick={() => setPremiumNotice(null)}>
                   Dismiss
                 </button>
+              </div>
+            ) : null}
+            {premium.features.hasUndo ? (
+              <div className={styles.undoRow}>
+                <button type="button" onClick={handleUndoLast} disabled={!canUndo}>
+                  Undo last swipe
+                </button>
+                <span>{undoHelperText}</span>
               </div>
             ) : null}
             <div className={styles.deck}>
@@ -460,8 +572,12 @@ export default function Home() {
                 </div>
               ) : (
                 <div className={`${styles.emptyState} ${styles.deckEmpty}`}>
-                  <h2>Queue complete</h2>
-                  <p>New compatibility scans will refresh once fresh wallets opt in. Stay tuned!</p>
+                  <h2>{filteredCount ? "Queue complete" : "No matches meet your filters"}</h2>
+                  <p>
+                    {filteredCount
+                      ? "New compatibility scans will refresh once fresh wallets opt in. Stay tuned!"
+                      : "Adjust your advanced filters to expand the matchmaking net."}
+                  </p>
                 </div>
               )}
             </div>
@@ -490,6 +606,15 @@ export default function Home() {
         </div>
 
         <aside className={styles.sidebar}>
+          {showFilters ? (
+            <PremiumFiltersPanel
+              filters={premiumFilters}
+              facets={filterFacets}
+              summary={filterSummary}
+              onChange={handleFiltersChange}
+              onReset={handleResetFilters}
+            />
+          ) : null}
           <section className={styles.panel}>
             <PremiumSubscriptionPanel
               plan={premium.plan}
@@ -504,6 +629,12 @@ export default function Home() {
               }
             />
           </section>
+          {showSpotlight ? (
+            <PremiumSuperLikeSpotlight entries={superLikeSpotlight} />
+          ) : null}
+          {showExclusiveContent ? (
+            <PremiumExclusiveContentPanel items={premium.exclusiveContent} />
+          ) : null}
           <section className={styles.panel}>
             <h3>Your crypto fingerprint</h3>
             <PersonalityHighlight assessment={seekerAssessment} />

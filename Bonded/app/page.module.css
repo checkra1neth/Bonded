@@ -310,6 +310,40 @@
   cursor: pointer;
 }
 
+.undoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  margin: 0.75rem 0 0.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(95, 91, 255, 0.2);
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.12), rgba(0, 209, 255, 0.08));
+}
+
+.undoRow button {
+  border: none;
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.85), rgba(0, 209, 255, 0.85));
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.undoRow button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.undoRow span {
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+}
+
 .emptyState {
   height: 100%;
   border-radius: 24px;

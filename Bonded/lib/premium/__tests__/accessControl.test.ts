@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { evaluateDecision, initializeUsage, recordDecision } from "../accessControl";
+import { evaluateDecision, initializeUsage, recordDecision, revertDecision } from "../accessControl";
 import { resolvePlan } from "../plans";
 
 const FREE_PLAN = resolvePlan("free");
@@ -61,5 +61,28 @@ describe("premium access control", () => {
     const updated = recordDecision(FREE_PLAN, usage, "like", secondDay);
     expect(updated.likes).toBe(1);
     expect(updated.windowStart).toBeLessThan(secondDay + 1);
+  });
+
+  it("reverts decisions when undoing actions", () => {
+    const timestamp = new Date("2024-10-01T12:00:00Z").getTime();
+    let usage = initializeUsage(timestamp);
+    usage = recordDecision(FREE_PLAN, usage, "like", timestamp);
+    expect(usage.likes).toBe(1);
+
+    const reverted = revertDecision(FREE_PLAN, usage, "like", timestamp + 60_000);
+    expect(reverted.likes).toBe(0);
+    expect(reverted.superLikes).toBe(0);
+  });
+
+  it("keeps unlimited allowances stable when reverting premium decisions", () => {
+    const timestamp = Date.now();
+    let usage = initializeUsage(timestamp);
+    usage = recordDecision(PREMIUM_PLAN, usage, "super", timestamp);
+    expect(usage.likes).toBe(0);
+    expect(usage.superLikes).toBe(0);
+
+    const reverted = revertDecision(PREMIUM_PLAN, usage, "super", timestamp + 120_000);
+    expect(reverted.likes).toBe(0);
+    expect(reverted.superLikes).toBe(0);
   });
 });

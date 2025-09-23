@@ -16,6 +16,7 @@ import {
   type PortfolioVisibilityLevel,
 } from "../../lib/portfolio/privacy";
 import type { SanitizedPortfolioSnapshot } from "../../lib/portfolio/types";
+import type { PremiumProfileHighlight } from "@/lib/premium";
 
 import { ProfileEditor } from "./ProfileEditor";
 import { ProfileOverview } from "./ProfileOverview";
@@ -32,6 +33,7 @@ interface ProfileDraft {
 
 interface ProfileManagementPanelProps {
   profile: CompatibilityProfile;
+  premiumHighlight?: PremiumProfileHighlight | null;
 }
 
 const DEFAULT_VERIFICATIONS: ProfileVerification[] = [
@@ -57,7 +59,7 @@ const DEFAULT_VERIFICATIONS: ProfileVerification[] = [
   },
 ];
 
-export function ProfileManagementPanel({ profile }: ProfileManagementPanelProps) {
+export function ProfileManagementPanel({ profile, premiumHighlight }: ProfileManagementPanelProps) {
   const initialPrivacy = useMemo(
     () => normalizePrivacyPreferences(DEFAULT_PRIVACY_PREFERENCES),
     [],
@@ -345,6 +347,21 @@ export function ProfileManagementPanel({ profile }: ProfileManagementPanelProps)
           </span>
         </div>
       </header>
+
+      {premiumHighlight ? (
+        <div className={styles.premiumHighlight} role="status">
+          <span
+            className={styles.premiumBadge}
+            style={{ background: premiumHighlight.accentColor }}
+          >
+            {premiumHighlight.badge}
+          </span>
+          <div>
+            <strong>{premiumHighlight.title}</strong>
+            <p>{premiumHighlight.description}</p>
+          </div>
+        </div>
+      ) : null}
 
       <div className={styles.grid}>
         <ProfileEditor

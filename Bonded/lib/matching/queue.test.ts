@@ -168,4 +168,32 @@ describe("matchQueueReducer", () => {
     expect(state.activeIndex).toBe(0);
     expect(state.exhausted).toBe(false);
   });
+
+  it("undoes the most recent decision and restores the candidate to the queue", () => {
+    const candidate = createCandidate("undo-test", {
+      interaction: { autoResponse: { onSuperLike: "like" } },
+    });
+
+    let state = createMatchQueueState([candidate]);
+
+    state = matchQueueReducer(state, {
+      type: "DECIDE",
+      candidateId: candidate.user.id,
+      decision: "super",
+      timestamp: 12,
+    });
+
+    expect(state.decisions).toHaveLength(1);
+    expect(state.matches).toHaveLength(1);
+    expect(state.entries[0]?.status).toBe("decided");
+
+    state = matchQueueReducer(state, { type: "UNDO_LAST" });
+
+    expect(state.decisions).toHaveLength(0);
+    expect(state.matches).toHaveLength(0);
+    expect(state.notifications).toHaveLength(0);
+    expect(state.entries[0]?.status).toBe("pending");
+    expect(state.activeIndex).toBe(0);
+    expect(state.exhausted).toBe(false);
+  });
 });

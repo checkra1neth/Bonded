@@ -1,0 +1,136 @@
+.container {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1.4rem 1.6rem;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--foreground) 6%, transparent), transparent 80%);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.header p {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+}
+
+.resetButton {
+  border: none;
+  background: rgba(95, 91, 255, 0.14);
+  color: rgba(95, 91, 255, 0.95);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+
+.resetButton:hover {
+  transform: translateY(-1px);
+}
+
+.fieldset {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.fieldset label,
+.fieldset .legend {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.fieldset input[type="search"] {
+  border: 1px solid color-mix(in srgb, var(--foreground) 16%, transparent);
+  border-radius: 12px;
+  padding: 0.55rem 0.75rem;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  color: inherit;
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sliderRow span {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.optionsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.optionsGrid button {
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.optionsGrid button[data-active] {
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.85), rgba(0, 209, 255, 0.85));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 12px 24px rgba(53, 38, 255, 0.16);
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.switch input[type="checkbox"] {
+  width: 42px;
+  height: 22px;
+  border-radius: 999px;
+  appearance: none;
+  background: color-mix(in srgb, var(--foreground) 14%, transparent);
+  position: relative;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.switch input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 160ms ease;
+}
+
+.switch input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.9), rgba(0, 209, 255, 0.9));
+}
+
+.switch input[type="checkbox"]:checked::after {
+  transform: translateX(18px);
+}
