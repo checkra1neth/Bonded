@@ -1,0 +1,390 @@
+.container {
+  display: grid;
+  gap: 1.75rem;
+  border-radius: 26px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  padding: clamp(1.5rem, 3vw, 2rem);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+}
+
+.summary {
+  margin-top: 0.75rem;
+  color: color-mix(in srgb, var(--foreground) 75%, transparent);
+  max-width: 42ch;
+}
+
+.timeframe {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+}
+
+.timeframeDivider {
+  opacity: 0.55;
+}
+
+.body {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+}
+
+.tasks ul {
+  list-style: none;
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+}
+
+.tasks li {
+  display: grid;
+  gap: 0.9rem;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  padding: 1.25rem 1.35rem;
+}
+
+.taskHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.taskHeader strong {
+  font-size: 1.05rem;
+}
+
+.taskHeader span {
+  display: block;
+  margin-top: 0.25rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.taskBadge {
+  align-self: flex-start;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.taskMeta {
+  display: flex;
+  justify-content: space-between;
+  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+  font-size: 0.85rem;
+}
+
+.progressTrack {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 10%, transparent);
+  overflow: hidden;
+}
+
+.progressValue {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5f5bff, #00d1ff);
+}
+
+.taskFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status {
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.status[data-status="complete"] {
+  color: #4cc38a;
+}
+
+.cta {
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 1.2rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #5f5bff, #00d1ff);
+  color: white;
+  cursor: pointer;
+  transition: opacity 160ms ease;
+}
+
+.cta:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.sideColumn {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel {
+  display: grid;
+  gap: 1rem;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  padding: 1.25rem;
+}
+
+.leaderboard,
+.badges {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.leaderboard li,
+.badges li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.leaderboard li {
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.leaderboardMeta {
+  display: grid;
+  gap: 0.35rem;
+  text-align: right;
+}
+
+.trend {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.trend-up {
+  color: #4cc38a;
+}
+
+.trend-steady {
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.trend-new {
+  color: #5f5bff;
+}
+
+.badgeIcon {
+  font-size: 1.5rem;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.badgeProgress {
+  flex: 0 0 110px;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 12%, transparent);
+  overflow: hidden;
+}
+
+.badgeProgress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ff8a8a, #ffd76f);
+}
+
+.badgeCallout {
+  margin: 0;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.events {
+  display: grid;
+  gap: 1rem;
+}
+
+.eventsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.eventGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.eventCard {
+  display: grid;
+  gap: 0.75rem;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  padding: 1.25rem;
+}
+
+.eventType {
+  display: inline-flex;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.eventMeta {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.eventMeta div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.eventMeta dt {
+  font-weight: 600;
+}
+
+.eventMeta dd {
+  margin: 0;
+}
+
+.eventCard footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.eventCard footer li {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.eventCard footer span {
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  font-size: 0.85rem;
+}
+
+.connections {
+  border-top: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  padding-top: 1rem;
+}
+
+.connections ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.connections li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-radius: 16px;
+  padding: 0.9rem 1rem;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.connections strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.connections span {
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  font-size: 0.85rem;
+}
+
+.connectionHighlight {
+  align-self: center;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
+}
+
+.type-defi {
+  background: rgba(95, 91, 255, 0.16);
+}
+
+.type-education {
+  background: rgba(255, 215, 111, 0.18);
+}
+
+.type-nft {
+  background: rgba(255, 147, 255, 0.18);
+}
+
+.event-defi_study_group {
+  background: rgba(95, 91, 255, 0.16);
+}
+
+.event-nft_gallery_walk {
+  background: rgba(255, 147, 255, 0.18);
+}
+
+.event-retroactive_review {
+  background: rgba(76, 195, 138, 0.18);
+}
+
+@media (max-width: 960px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+
+  .eventsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

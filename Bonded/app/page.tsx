@@ -17,6 +17,7 @@ import { IcebreakerSuggestions } from "./components/IcebreakerSuggestions";
 import { ChatInterface } from "./components/ChatInterface";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { ProfileManagementPanel } from "./components/ProfileManagementPanel";
+import { ChallengeEventHub } from "./components/ChallengeEventHub";
 import styles from "./page.module.css";
 import { useMatchQueue } from "./hooks/useMatchQueue";
 import { useIcebreakerSuggestions } from "./hooks/useIcebreakerSuggestions";
@@ -427,6 +428,10 @@ export default function Home() {
                 </div>
               )}
             </div>
+          </section>
+
+          <section className={styles.challengeSection}>
+            <ChallengeEventHub />
           </section>
 
           <section className={styles.chatSection}>

@@ -32,6 +32,58 @@ enum ConversationRole {
   SYSTEM
 }
 
+enum ChallengeDifficultyLevel {
+  STARTER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ChallengeTaskType {
+  DEFI
+  NFT
+  SOCIAL
+  EDUCATION
+  ONCHAIN_ACTION
+}
+
+enum ChallengeTaskTargetKind {
+  ACTIONS
+  STREAK
+  COLLABORATION
+}
+
+enum ChallengeTaskCategory {
+  SOLO
+  TEAM
+}
+
+enum EventType {
+  DEFI_STUDY_GROUP
+  NFT_GALLERY_WALK
+  MARKET_BRIEFING
+  COMMUNITY_BUIDL
+  RETROACTIVE_REVIEW
+}
+
+enum EventFormat {
+  VIRTUAL
+  IN_PERSON
+  HYBRID
+}
+
+enum EventAttendanceStatus {
+  INVITED
+  CONFIRMED
+  WAITLISTED
+  CHECKED_IN
+}
+
+enum BadgeRarity {
+  CORE
+  ELITE
+  LEGENDARY
+}
+
 enum MessageDeliveryStatus {
   SENT
   DELIVERED
@@ -154,4 +206,157 @@ model Message {
 
   @@index([conversationId], map: "Message_conversationId_idx")
   @@index([senderId], map: "Message_senderId_idx")
+}
+
+model Challenge {
+  id                 String                      @id @default(cuid())
+  slug               String                      @unique
+  title              String
+  theme              String
+  summary            String
+  difficulty         ChallengeDifficultyLevel    @default(INTERMEDIATE)
+  focusAreas         String[]
+  trendingNarratives String[]
+  featuredProtocols  String[]
+  communitySpotlight String
+  startsAt           DateTime
+  endsAt             DateTime
+  createdAt          DateTime                    @default(now())
+  updatedAt          DateTime                    @updatedAt
+
+  tasks          ChallengeTask[]
+  participations ChallengeParticipation[]
+  events         CommunityEvent[]
+  badgeAwards    ChallengeBadgeAward[]
+}
+
+model ChallengeTask {
+  id                  String                  @id @default(cuid())
+  challenge           Challenge               @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId         String
+  title               String
+  summary             String
+  type                ChallengeTaskType
+  focusAreas          String[]
+  points              Int
+  category            ChallengeTaskCategory
+  targetKind          ChallengeTaskTargetKind
+  targetGoal          Int
+  cadence             String?
+  minimumCollaborators Int?
+  verificationMethod  String
+  verificationDetail  String
+  bonusDescription    String?
+  bonusPoints         Int?
+  createdAt           DateTime @default(now())
+
+  @@index([challengeId], map: "ChallengeTask_challengeId_idx")
+}
+
+model ChallengeParticipation {
+  id               String           @id @default(cuid())
+  challenge        Challenge        @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId      String
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  xp               Int              @default(0)
+  streak           Int              @default(0)
+  completedTaskIds String[]
+  badges           String[]
+  progress         Json
+  lastSubmissionAt DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  attendances CommunityEventAttendance[]
+  connectionsA EventConnection[]         @relation("ConnectionParticipantA")
+  connectionsB EventConnection[]         @relation("ConnectionParticipantB")
+
+  @@index([challengeId], map: "ChallengeParticipation_challengeId_idx")
+  @@index([userId], map: "ChallengeParticipation_userId_idx")
+}
+
+model ChallengeBadge {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  description String
+  rarity      BadgeRarity  @default(CORE)
+  icon        String?
+  criteria    String
+  createdAt   DateTime     @default(now())
+
+  awards ChallengeBadgeAward[]
+}
+
+model ChallengeBadgeAward {
+  id               String                 @id @default(cuid())
+  badge            ChallengeBadge        @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  badgeId          String
+  challenge        Challenge             @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId      String
+  participation    ChallengeParticipation @relation(fields: [participationId], references: [id], onDelete: Cascade)
+  participationId  String
+  reason           String
+  awardedAt        DateTime              @default(now())
+
+  @@index([challengeId], map: "ChallengeBadgeAward_challengeId_idx")
+  @@index([participationId], map: "ChallengeBadgeAward_participationId_idx")
+}
+
+model CommunityEvent {
+  id                String            @id @default(cuid())
+  challenge         Challenge         @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId       String
+  title             String
+  description       String
+  type              EventType
+  format            EventFormat
+  focusAreas        String[]
+  startTime         DateTime
+  endTime           DateTime
+  host              String
+  location          String
+  capacity          Int
+  vibe              String?
+  resources         String[]
+  agenda            Json
+  recommendedRoles  String[]
+  createdAt         DateTime          @default(now())
+
+  attendances CommunityEventAttendance[]
+  connections EventConnection[]
+
+  @@index([challengeId], map: "CommunityEvent_challengeId_idx")
+  @@index([type], map: "CommunityEvent_type_idx")
+}
+
+model CommunityEventAttendance {
+  id              String                 @id @default(cuid())
+  event           CommunityEvent         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId         String
+  participation   ChallengeParticipation @relation(fields: [participationId], references: [id], onDelete: Cascade)
+  participationId String
+  status          EventAttendanceStatus  @default(INVITED)
+  joinedAt        DateTime               @default(now())
+  notes           String?
+
+  @@index([eventId], map: "CommunityEventAttendance_eventId_idx")
+  @@index([participationId], map: "CommunityEventAttendance_participationId_idx")
+}
+
+model EventConnection {
+  id               String                 @id @default(cuid())
+  event            CommunityEvent         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId          String
+  participantA     ChallengeParticipation @relation("ConnectionParticipantA", fields: [participantAId], references: [id], onDelete: Cascade)
+  participantAId   String
+  participantB     ChallengeParticipation @relation("ConnectionParticipantB", fields: [participantBId], references: [id], onDelete: Cascade)
+  participantBId   String
+  synergyScore     Float
+  reason           String
+  highlight        String?
+  createdAt        DateTime @default(now())
+
+  @@index([eventId], map: "EventConnection_eventId_idx")
 }
