@@ -95,7 +95,7 @@
     - Write end-to-end tests for onboarding flow
     - _Requirements: 1.5, 1.6, 7.1, 8.1_
 
-  - [ ] 6.2 Implement user profile display and editing
+  - [x] 6.2 Implement user profile display and editing
     - Create comprehensive user profile components
     - Build profile editing interface with real-time updates
     - Implement privacy controls for portfolio information display

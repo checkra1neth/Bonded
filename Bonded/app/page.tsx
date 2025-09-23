@@ -16,6 +16,7 @@ import { WalletAuthPanel } from "./components/WalletAuthPanel";
 import { IcebreakerSuggestions } from "./components/IcebreakerSuggestions";
 import { ChatInterface } from "./components/ChatInterface";
 import { OnboardingWizard } from "./components/OnboardingWizard";
+import { ProfileManagementPanel } from "./components/ProfileManagementPanel";
 import styles from "./page.module.css";
 import { useMatchQueue } from "./hooks/useMatchQueue";
 import { useIcebreakerSuggestions } from "./hooks/useIcebreakerSuggestions";
@@ -55,12 +56,35 @@ const seekerProfile: CompatibilityProfile = {
   user: {
     id: "seeker",
     displayName: "Ava Protocol",
+    headline: "Base-native strategist bridging DeFi and governance",
     personality: seekerAssessment.type,
     basename: "ava.base",
     avatarColor: "linear-gradient(135deg, #5f5bff 0%, #00d1ff 100%)",
     location: "New York • EST",
     achievements: ["Base OG", "DAO Strategist"],
     bio: "Bridging TradFi intuition with DeFi execution.",
+    verifications: [
+      {
+        id: "wallet",
+        label: "Wallet ownership",
+        status: "verified",
+        detail: "Signed in with primary Base account",
+        lastChecked: new Date("2024-10-04T15:00:00Z").getTime(),
+      },
+      {
+        id: "basename",
+        label: "Basename linked",
+        status: "verified",
+        detail: "Reverse record configured for ava.base",
+        lastChecked: new Date("2024-10-03T09:00:00Z").getTime(),
+      },
+      {
+        id: "proof_of_humanity",
+        label: "Humanity proof",
+        status: "pending",
+        detail: "Queued for verification via Base Identity",
+      },
+    ],
   },
   portfolio: seekerPortfolio,
 };
@@ -374,6 +398,9 @@ export default function Home() {
 
       <main className={styles.main}>
         <div className={styles.primaryColumn}>
+          <section className={styles.profileSection}>
+            <ProfileManagementPanel profile={seekerProfile} />
+          </section>
           <section className={styles.matchSection}>
             <div className={styles.deck}>
               {nextCandidate ? (

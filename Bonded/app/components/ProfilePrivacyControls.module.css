@@ -1,0 +1,102 @@
+.container {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  background: color-mix(in srgb, var(--foreground) 3%, transparent);
+}
+
+.header {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.header p {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+  line-height: 1.5;
+}
+
+.toggleGrid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.toggle {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.toggle input {
+  margin-top: 0.2rem;
+}
+
+.toggle span {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+}
+
+.toggle strong {
+  display: block;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
+}
+
+.visibilityGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.visibilityGrid label span {
+  display: block;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+  margin-bottom: 0.35rem;
+}
+
+.visibilityGrid select,
+.allowList input,
+.allowList textarea {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 3%, transparent);
+  color: inherit;
+  font: inherit;
+}
+
+.allowList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.allowList p {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.allowList label span {
+  display: block;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+  margin-bottom: 0.35rem;
+}
+
+@media (max-width: 700px) {
+  .toggleGrid {
+    grid-template-columns: 1fr;
+  }
+}

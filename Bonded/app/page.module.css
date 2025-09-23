@@ -264,6 +264,10 @@
   align-content: start;
 }
 
+.profileSection {
+  display: block;
+}
+
 .chatSection {
   display: block;
 }

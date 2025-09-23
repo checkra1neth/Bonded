@@ -1,0 +1,59 @@
+.container {
+  display: grid;
+  gap: 1.75rem;
+  border-radius: 26px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--foreground) 6%, transparent), transparent 65%);
+  padding: clamp(1.75rem, 3vw, 2.25rem);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.header h2 {
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
+}
+
+.header p {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.status {
+  display: grid;
+  gap: 0.25rem;
+  text-align: right;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.status strong {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 75%, transparent);
+}
+
+.grid {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 1.75rem);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.footer {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .status {
+    text-align: left;
+  }
+}

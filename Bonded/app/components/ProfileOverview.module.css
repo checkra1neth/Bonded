@@ -1,0 +1,213 @@
+.container {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.75rem;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--foreground) 6%, transparent), transparent 70%);
+  box-shadow: 0 18px 38px rgba(17, 24, 68, 0.12);
+}
+
+.header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.avatar {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.avatar span {
+  mix-blend-mode: screen;
+  text-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.identity {
+  display: grid;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.displayName {
+  font-size: 1.3rem;
+  letter-spacing: -0.01em;
+}
+
+.meta {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.headline {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--foreground) 75%, transparent);
+}
+
+.bio {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.section h5 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 58%, transparent);
+}
+
+.badgeList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+
+.muted {
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.verificationList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.verification {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+
+.verification p {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+  margin-top: 0.25rem;
+}
+
+.status {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.statusVerified {
+  color: #1a9963;
+}
+
+.statusPending {
+  color: #d19c2b;
+}
+
+.statusUnverified {
+  color: #d14343;
+}
+
+.portfolioGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.portfolioRow {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.portfolioRow strong {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.tokenList,
+.protocolList,
+.nftList,
+.highlightList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.tokenList li,
+.protocolList li,
+.nftList li,
+.highlightList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.tokenList small,
+.protocolList small,
+.nftList small {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 50%, transparent);
+}
+
+.activityCard {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  border: 1px dashed color-mix(in srgb, var(--foreground) 18%, transparent);
+  background: color-mix(in srgb, var(--foreground) 3%, transparent);
+}
+
+.activityMeta {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+@media (max-width: 900px) {
+  .container {
+    padding: 1.5rem;
+  }
+}
