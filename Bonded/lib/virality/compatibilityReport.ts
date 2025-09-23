@@ -120,6 +120,7 @@ const RISK_COPY: Record<NonNullable<SanitizedActivityPattern>["riskTolerance"], 
   balanced: "balanced conviction",
   adventurous: "bold energy",
   degenerate: "full degen mode",
+  withheld: "keeps risk profile private",
 };
 
 const CATEGORY_HASHTAGS: Record<CompatibilityCategoryId, string> = {

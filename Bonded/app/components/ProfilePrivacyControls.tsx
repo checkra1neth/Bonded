@@ -5,6 +5,7 @@ import type {
   ActivityVisibilityLevel,
   PortfolioPrivacyPreferences,
   PortfolioVisibilityLevel,
+  TransactionVisibilityLevel,
 } from "../../lib/portfolio/privacy";
 
 import styles from "./ProfilePrivacyControls.module.css";
@@ -29,7 +30,20 @@ interface ProfilePrivacyControlsProps {
   ) => void;
   onActivityVisibilityChange: (value: ActivityVisibilityLevel) => void;
   onAllowListChange: (field: "fids" | "wallets", value: string) => void;
+  onAdvancedToggle: (key: AdvancedPrivacyKey) => void;
+  onTransactionVisibilityChange: (value: TransactionVisibilityLevel) => void;
+  onTransactionWindowChange: (value: number) => void;
 }
+
+type AdvancedPrivacyKey =
+  | "maskTokenConviction"
+  | "maskTokenChains"
+  | "maskDefiStrategies"
+  | "maskDefiRisks"
+  | "maskNftThemes"
+  | "maskActivityRisk"
+  | "redactHighlights"
+  | "shareTransactions";
 
 const VISIBILITY_LABELS: Record<PortfolioVisibilityLevel, string> = {
   HIDDEN: "Hidden",
@@ -43,6 +57,54 @@ const ACTIVITY_LABELS: Record<ActivityVisibilityLevel, string> = {
   PATTERNS: "Patterns",
 };
 
+const TRANSACTION_VISIBILITY_LABELS: Record<TransactionVisibilityLevel, string> = {
+  HIDDEN: "Hidden",
+  ANONYMIZED: "Anonymized buckets",
+  SUMMARY: "Privacy-safe summary",
+};
+
+const ADVANCED_TOGGLES: Array<{
+  key: AdvancedPrivacyKey;
+  label: string;
+  description: string;
+}> = [
+  {
+    key: "maskTokenConviction",
+    label: "Hide conviction scores",
+    description: "Only share allocation buckets, never conviction labels.",
+  },
+  {
+    key: "maskTokenChains",
+    label: "Hide chain provenance",
+    description: "Strip Base/L2 chain tags from shared token data.",
+  },
+  {
+    key: "maskDefiStrategies",
+    label: "Mask DeFi strategies",
+    description: "Share protocols without revealing strategy notes.",
+  },
+  {
+    key: "maskDefiRisks",
+    label: "Hide risk scoring",
+    description: "Keep personal risk appetite private in shared views.",
+  },
+  {
+    key: "maskNftThemes",
+    label: "Redact NFT themes",
+    description: "Share presence without exposing collection themes.",
+  },
+  {
+    key: "maskActivityRisk",
+    label: "Mask risk tolerance",
+    description: "Display timezone windows while hiding risk alignment.",
+  },
+  {
+    key: "redactHighlights",
+    label: "Redact highlight details",
+    description: "Swap precise milestones for privacy-safe summaries.",
+  },
+];
+
 export function ProfilePrivacyControls({
   privacy,
   allowListInputs,
@@ -50,6 +112,9 @@ export function ProfilePrivacyControls({
   onVisibilityChange,
   onActivityVisibilityChange,
   onAllowListChange,
+  onAdvancedToggle,
+  onTransactionVisibilityChange,
+  onTransactionWindowChange,
 }: ProfilePrivacyControlsProps) {
   return (
     <section className={styles.container} aria-label="Privacy controls">
@@ -196,6 +261,82 @@ export function ProfilePrivacyControls({
             onChange={(event) => onAllowListChange("wallets", event.target.value)}
           />
         </label>
+      </div>
+
+      <div className={styles.advancedSection}>
+        <div className={styles.advancedHeader}>
+          <h5>Advanced privacy filters</h5>
+          <p>Mask additional metadata before sharing snapshots.</p>
+        </div>
+        <div className={styles.advancedGrid}>
+          {ADVANCED_TOGGLES.map(({ key, label, description }) => (
+            <label key={key} className={styles.toggle}>
+              <input
+                type="checkbox"
+                checked={Boolean(privacy[key])}
+                onChange={() => onAdvancedToggle(key)}
+              />
+              <span>
+                <strong>{label}</strong>
+                {description}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.transactionSection}>
+        <label className={styles.toggle}>
+          <input
+            type="checkbox"
+            checked={privacy.shareTransactions}
+            onChange={() => onAdvancedToggle("shareTransactions")}
+          />
+          <span>
+            <strong>Share anonymized transaction flow</strong>
+            Publish only bucketed inbound/outbound counts with masked counterparties.
+          </span>
+        </label>
+
+        {privacy.shareTransactions ? (
+          <div className={styles.transactionControls}>
+            <label>
+              <span>Visibility mode</span>
+              <select
+                value={privacy.transactionVisibility}
+                onChange={(event) =>
+                  onTransactionVisibilityChange(event.target.value as TransactionVisibilityLevel)
+                }
+              >
+                {Object.entries(TRANSACTION_VISIBILITY_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>Rolling window (days)</span>
+              <input
+                type="number"
+                min={1}
+                max={365}
+                value={privacy.transactionWindowDays}
+                onChange={(event) => {
+                  const parsed = Number.parseInt(event.target.value, 10);
+                  onTransactionWindowChange(Number.isFinite(parsed) ? parsed : privacy.transactionWindowDays);
+                }}
+              />
+            </label>
+            <p className={styles.transactionCopy}>
+              We aggregate transfers into privacy-safe buckets and mask counterparties using hashed labels.
+            </p>
+          </div>
+        ) : (
+          <p className={styles.transactionCopy}>
+            Keep this disabled to prevent any transaction cadence data from leaving your vault.
+          </p>
+        )}
       </div>
     </section>
   );

@@ -101,6 +101,18 @@ export interface ChatMessage {
   createdAt: number;
   deliveredAt?: number;
   readAt?: number;
+  preview?: string;
+  encryption?: ChatMessageEncryption;
+}
+
+export interface ChatMessageEncryption {
+  version: "1";
+  algorithm: "AES-256-GCM";
+  iv: string;
+  ciphertext: string;
+  authTag: string;
+  fingerprint: string;
+  associatedData?: string;
 }
 
 export interface ChatHistoryPayload {

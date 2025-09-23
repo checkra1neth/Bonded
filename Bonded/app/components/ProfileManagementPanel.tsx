@@ -14,6 +14,7 @@ import {
   type ActivityVisibilityLevel,
   type PortfolioPrivacyPreferences,
   type PortfolioVisibilityLevel,
+  type TransactionVisibilityLevel,
 } from "../../lib/portfolio/privacy";
 import type { SanitizedPortfolioSnapshot } from "../../lib/portfolio/types";
 import type { PremiumProfileHighlight } from "@/lib/premium";
@@ -35,6 +36,18 @@ interface ProfileManagementPanelProps {
   profile: CompatibilityProfile;
   premiumHighlight?: PremiumProfileHighlight | null;
 }
+
+type AdvancedPrivacyKey = keyof Pick<
+  PortfolioPrivacyPreferences,
+  | "maskTokenConviction"
+  | "maskTokenChains"
+  | "maskDefiStrategies"
+  | "maskDefiRisks"
+  | "maskNftThemes"
+  | "maskActivityRisk"
+  | "redactHighlights"
+  | "shareTransactions"
+>;
 
 const DEFAULT_VERIFICATIONS: ProfileVerification[] = [
   {
@@ -192,6 +205,68 @@ export function ProfileManagementPanel({ profile, premiumHighlight }: ProfileMan
         } as PortfolioPrivacyPreferences;
         changed = next[key] !== prev[key];
         return next;
+      });
+
+      if (changed) {
+        markDirty();
+      }
+    },
+    [markDirty],
+  );
+
+  const handleAdvancedToggle = useCallback(
+    (key: AdvancedPrivacyKey) => {
+      let changed = false;
+      setPrivacy((prev) => {
+        const next = {
+          ...prev,
+          [key]: !prev[key],
+        } as PortfolioPrivacyPreferences;
+        changed = next[key] !== prev[key];
+        return next;
+      });
+
+      if (changed) {
+        markDirty();
+      }
+    },
+    [markDirty],
+  );
+
+  const handleTransactionVisibilityChange = useCallback(
+    (value: TransactionVisibilityLevel) => {
+      let changed = false;
+      setPrivacy((prev) => {
+        if (prev.transactionVisibility === value) {
+          return prev;
+        }
+        changed = true;
+        return {
+          ...prev,
+          transactionVisibility: value,
+        };
+      });
+
+      if (changed) {
+        markDirty();
+      }
+    },
+    [markDirty],
+  );
+
+  const handleTransactionWindowChange = useCallback(
+    (value: number) => {
+      const normalized = Math.min(365, Math.max(1, Math.round(value)));
+      let changed = false;
+      setPrivacy((prev) => {
+        if (prev.transactionWindowDays === normalized) {
+          return prev;
+        }
+        changed = true;
+        return {
+          ...prev,
+          transactionWindowDays: normalized,
+        };
       });
 
       if (changed) {
@@ -389,6 +464,9 @@ export function ProfileManagementPanel({ profile, premiumHighlight }: ProfileMan
           onVisibilityChange={handleVisibilityChange}
           onActivityVisibilityChange={handleActivityVisibilityChange}
           onAllowListChange={handleAllowListChange}
+          onAdvancedToggle={handleAdvancedToggle}
+          onTransactionVisibilityChange={handleTransactionVisibilityChange}
+          onTransactionWindowChange={handleTransactionWindowChange}
         />
       </div>
     </section>

@@ -2,8 +2,10 @@ import type {
   ActivityPattern,
   DeFiProtocol,
   PortfolioSnapshot,
+  PortfolioTransaction,
   RiskTolerance,
   TokenHolding,
+  TransactionDirection,
   TradingFrequency,
 } from "./types";
 
@@ -179,6 +181,7 @@ export class PortfolioAnalyzer {
     const tokens = this.buildTokenHoldings(tokenBalances);
     const defiProtocols = this.detectDefiProtocols(tokens, transfers);
     const activity = this.deriveActivityPattern(transfers, defiProtocols, tokens);
+    const transactions = this.buildTransactionHistory(transfers, address);
 
     const highlights = this.buildHighlights(tokens, defiProtocols, activity);
 
@@ -188,6 +191,7 @@ export class PortfolioAnalyzer {
       nftCollections: [],
       activity,
       highlights,
+      transactions,
     };
   }
 
@@ -382,6 +386,92 @@ export class PortfolioAnalyzer {
     } satisfies ActivityPattern;
   }
 
+  private buildTransactionHistory(
+    transfers: AlchemyAssetTransfer[],
+    address: string,
+  ): PortfolioTransaction[] {
+    if (!transfers.length) {
+      return [];
+    }
+
+    const normalizedAddress = address.toLowerCase();
+    const transactions: PortfolioTransaction[] = [];
+    const seen = new Set<string>();
+
+    for (const transfer of transfers) {
+      const timestampRaw = transfer.metadata?.blockTimestamp;
+      if (!timestampRaw) {
+        continue;
+      }
+
+      const timestamp = Date.parse(timestampRaw);
+      if (!Number.isFinite(timestamp)) {
+        continue;
+      }
+
+      const from = transfer.from?.toLowerCase() ?? null;
+      const to = transfer.to?.toLowerCase() ?? null;
+
+      let direction: TransactionDirection;
+      let counterpartyAddress: string | null = null;
+
+      if (from === normalizedAddress && to === normalizedAddress) {
+        direction = "self";
+        counterpartyAddress = normalizedAddress;
+      } else if (from === normalizedAddress) {
+        direction = "outbound";
+        counterpartyAddress = to ?? transfer.rawContract?.address ?? null;
+      } else if (to === normalizedAddress) {
+        direction = "inbound";
+        counterpartyAddress = from ?? transfer.rawContract?.address ?? null;
+      } else {
+        continue;
+      }
+
+      const counterparty = counterpartyAddress ?? transfer.to ?? transfer.from ?? "unknown";
+      const fingerprint = transfer.hash ?? createDeterministicId(`${timestamp}:${direction}:${counterparty}`);
+      if (seen.has(fingerprint)) {
+        continue;
+      }
+      seen.add(fingerprint);
+
+      const protocolDefinition =
+        counterpartyAddress && ADDRESS_PROTOCOL_MAP.get(counterpartyAddress.toLowerCase());
+
+      let counterpartyType: NonNullable<PortfolioTransaction["counterpartyType"]> = "unknown";
+      if (direction === "self") {
+        counterpartyType = "user";
+      } else if (protocolDefinition) {
+        counterpartyType = "protocol";
+      } else if (transfer.category === "external") {
+        counterpartyType = "bridge";
+      } else if (transfer.category === "internal") {
+        counterpartyType = "contract";
+      } else if (counterpartyAddress?.startsWith("0x")) {
+        counterpartyType = "user";
+      }
+
+      const asset = transfer.asset?.toUpperCase?.() ?? null;
+
+      const transaction: PortfolioTransaction = {
+        id: fingerprint,
+        hash: transfer.hash ?? null,
+        timestamp,
+        direction,
+        counterparty,
+        counterpartyType,
+        protocol: protocolDefinition?.name,
+        asset,
+        valueUsd: null,
+        note: transfer.category ?? null,
+      };
+
+      transactions.push(transaction);
+    }
+
+    return transactions.sort((a, b) => b.timestamp - a.timestamp).slice(0, 200);
+  }
+
   private buildHighlights(
     tokens: TokenHolding[],
     defiProtocols: DeFiProtocol[],
@@ -566,4 +656,12 @@ function clamp01(value: number): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+function createDeterministicId(input: string): string {
+  let hash = 0;
+  for (let index = 0; index < input.length; index += 1) {
+    hash = (hash * 33 + input.charCodeAt(index)) >>> 0;
+  }
+  return `tx_${hash.toString(16).padStart(8, "0")}`;
 }

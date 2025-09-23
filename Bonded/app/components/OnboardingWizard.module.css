@@ -167,6 +167,53 @@
   gap: 0.75rem;
 }
 
+.advancedPrivacy {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.advancedPrivacy h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.transactionPrivacy {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.transactionControls {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.transactionControls label span {
+  display: block;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+  margin-bottom: 0.35rem;
+}
+
+.transactionControls select,
+.transactionControls input {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent);
+  background: color-mix(in srgb, var(--foreground) 3%, transparent);
+  padding: 0.6rem 0.75rem;
+  color: inherit;
+  font: inherit;
+}
+
+.transactionHint {
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
 .toggleRow {
   display: flex;
   align-items: center;
