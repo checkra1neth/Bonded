@@ -63,6 +63,7 @@ describe("chat state store", () => {
     const history = listMessages(conversationId);
     expect(history).toHaveLength(1);
     expect(history[0]?.status).toBe("delivered");
+    expect(history[0]?.kind).toBe("text");
 
     const delivered = updateMessageStatus(conversationId, message.id, "delivered", Date.now());
     expect(delivered?.deliveredAt).toBeDefined();

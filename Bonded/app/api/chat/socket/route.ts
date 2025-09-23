@@ -143,13 +143,19 @@ function handleIncomingMessage(
     displayName: payload.senderName,
     avatarColor: payload.senderAvatarColor,
   };
-  const message = toDeliveredMessage(context.conversationId, sender, payload.body, timestamp);
+  const message = toDeliveredMessage(
+    context.conversationId,
+    sender,
+    payload.body,
+    timestamp,
+    { kind: payload.kind, metadata: payload.metadata },
+  );
   appendMessage(context.conversationId, message);
 
   broadcastMessage(context.conversationId, message, payload.tempId, sender.userId);
 
   const peer = getConversationPeer(context.conversationId);
-  if (peer && peer.userId !== sender.userId) {
+  if (peer && peer.userId !== sender.userId && payload.kind !== "reaction") {
     scheduleAutoResponse(context.conversationId, peer);
   }
 }
@@ -252,7 +258,7 @@ function scheduleAutoResponse(conversationId: string, peer: ChatParticipant) {
     broadcast(conversationId, { ...typingEvent, isTyping: false });
 
     const timestamp = Date.now();
-    const message = toDeliveredMessage(conversationId, peer, plan.body, timestamp);
+    const message = toDeliveredMessage(conversationId, peer, plan.body, timestamp, { kind: "text" });
     appendMessage(conversationId, message);
     broadcastMessage(conversationId, message, undefined, peer.userId);
 
