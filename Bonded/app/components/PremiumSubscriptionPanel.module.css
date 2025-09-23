@@ -1,0 +1,194 @@
+.container {
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.12), rgba(0, 209, 255, 0.12));
+  border: 1px solid rgba(95, 91, 255, 0.3);
+  border-radius: 20px;
+  padding: 24px;
+  color: #101225;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.planBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(95, 91, 255, 0.18);
+  color: #3526ff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.description {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  color: rgba(16, 18, 37, 0.75);
+}
+
+.price {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #3526ff;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.metrics div {
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid rgba(95, 91, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metrics strong {
+  font-size: 1.05rem;
+}
+
+.metrics span {
+  font-size: 0.85rem;
+  color: rgba(16, 18, 37, 0.65);
+}
+
+.perks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px 16px;
+  font-size: 0.9rem;
+  color: rgba(16, 18, 37, 0.85);
+}
+
+.perks li::before {
+  content: "★";
+  margin-right: 6px;
+  color: #3526ff;
+}
+
+.whoLikedMe {
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(53, 38, 255, 0.12);
+}
+
+.whoLikedMe h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+
+.whoLikedMe ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.whoLikedMe li {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.whoLikedMe strong {
+  display: block;
+}
+
+.whoMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: rgba(16, 18, 37, 0.7);
+}
+
+.emptyState {
+  margin: 0;
+  color: rgba(16, 18, 37, 0.6);
+  font-size: 0.9rem;
+}
+
+.lockedEvents {
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px dashed rgba(53, 38, 255, 0.35);
+  background: rgba(53, 38, 255, 0.08);
+}
+
+.lockedEvents h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.lockedEvents ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.lockedEvents li span {
+  display: block;
+  color: rgba(53, 38, 255, 0.75);
+  margin-top: 2px;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cta {
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #3526ff, #00c6ff);
+  color: white;
+  font-weight: 600;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.cta:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+.cta:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #d92c2c;
+}

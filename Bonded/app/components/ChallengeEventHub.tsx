@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { useChallengeHub } from "../hooks/useChallengeHub";
+import type { ChallengeHubView } from "../hooks/useChallengeHub";
 import styles from "./ChallengeEventHub.module.css";
 
 const formatDate = (date: Date) =>
@@ -16,9 +16,15 @@ const formatDate = (date: Date) =>
 
 const toPercent = (value: number) => `${Math.round(value * 100)}%`;
 
-export function ChallengeEventHub() {
-  const { challenge, me, leaderboard, events, connections, badgeAwards, badgeDetails, projectedBadges, logProgress } =
-    useChallengeHub();
+interface ChallengeEventHubProps {
+  view: ChallengeHubView;
+  accessibleEvents?: ChallengeHubView["events"];
+  lockedEvents?: ChallengeHubView["events"];
+}
+
+export function ChallengeEventHub({ view, accessibleEvents, lockedEvents = [] }: ChallengeEventHubProps) {
+  const events = accessibleEvents ?? view.events;
+  const { challenge, me, leaderboard, connections, badgeAwards, badgeDetails, projectedBadges, logProgress } = view;
 
   return (
     <section className={styles.container} aria-labelledby="challenge-hub-title">
@@ -171,6 +177,11 @@ export function ChallengeEventHub() {
             </article>
           ))}
         </div>
+        {lockedEvents.length > 0 && (
+          <p className={styles.lockedNotice}>
+            {lockedEvents.length} premium event{lockedEvents.length === 1 ? "" : "s"} available with Founder access.
+          </p>
+        )}
       </div>
 
       {connections.length > 0 && (

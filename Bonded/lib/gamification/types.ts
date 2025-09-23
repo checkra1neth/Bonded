@@ -133,6 +133,8 @@ export interface EventAgendaItem {
   outcome: string;
 }
 
+export type EventAccessLevel = "standard" | "premium";
+
 export interface ChallengeEvent {
   id: string;
   title: string;
@@ -149,6 +151,8 @@ export interface ChallengeEvent {
   resources: string[];
   agenda: EventAgendaItem[];
   recommendedRoles: string[];
+  access: EventAccessLevel;
+  premiumPerks?: string[];
 }
 
 export interface EventConnectionSuggestion {

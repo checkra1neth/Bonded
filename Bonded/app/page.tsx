@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   buildMatchCandidate,
   describeCategory,
@@ -11,6 +11,7 @@ import {
 } from "@/lib/matching/compatibility";
 import { assessPersonality } from "@/lib/personality/assessment";
 import { MatchCard } from "./components/MatchCard";
+import { PremiumSubscriptionPanel } from "./components/PremiumSubscriptionPanel";
 import { PersonalityHighlight } from "./components/PersonalityHighlight";
 import { WalletAuthPanel } from "./components/WalletAuthPanel";
 import { IcebreakerSuggestions } from "./components/IcebreakerSuggestions";
@@ -21,6 +22,9 @@ import { ChallengeEventHub } from "./components/ChallengeEventHub";
 import { SocialEngagementPanel } from "./components/SocialEngagementPanel";
 import styles from "./page.module.css";
 import { useMatchQueue } from "./hooks/useMatchQueue";
+import { usePremiumSubscription } from "./hooks/usePremiumSubscription";
+import { useChallengeHub } from "./hooks/useChallengeHub";
+import { prioritizeCandidates, resolvePlan } from "@/lib/premium";
 import { useIcebreakerSuggestions } from "./hooks/useIcebreakerSuggestions";
 
 const seekerPortfolio: CompatibilityProfile["portfolio"] = {
@@ -237,8 +241,15 @@ export default function Home() {
     [],
   );
 
+  const premiumPlan = useMemo(() => resolvePlan("premium_founder"), []);
+
+  const prioritizedCandidates = useMemo(
+    () => prioritizeCandidates(initialCandidates, premiumPlan),
+    [initialCandidates, premiumPlan],
+  );
+
   const { state: queueState, activeCandidate, decide, dismissNotification, reviewedCount } =
-    useMatchQueue(initialCandidates);
+    useMatchQueue(prioritizedCandidates);
 
   const totalCandidates = queueState.entries.length;
   const progress = totalCandidates
@@ -283,6 +294,15 @@ export default function Home() {
       candidatesById,
     });
 
+  const premium = usePremiumSubscription({ planId: premiumPlan.id, queueState });
+  const [premiumNotice, setPremiumNotice] = useState<string | null>(null);
+
+  const challengeView = useChallengeHub();
+  const eventPartition = useMemo(
+    () => premium.partitionEvents(challengeView.events),
+    [premium.partitionEvents, challengeView.events],
+  );
+
   const nextCandidate = queueState.entries.find((entry, index) => {
     if (queueState.activeIndex === -1) {
       return false;
@@ -295,6 +315,14 @@ export default function Home() {
       return;
     }
 
+    const evaluation = premium.canSendDecision(decision);
+    if (!evaluation.canSend) {
+      setPremiumNotice(evaluation.reason ?? "Upgrade to continue sending likes.");
+      return;
+    }
+
+    setPremiumNotice(null);
+    premium.registerDecision(decision);
     decide(activeCandidate.user.id, decision);
   };
 
@@ -404,6 +432,14 @@ export default function Home() {
             <ProfileManagementPanel profile={seekerProfile} />
           </section>
           <section className={styles.matchSection}>
+            {premiumNotice ? (
+              <div className={styles.premiumNotice}>
+                <span>{premiumNotice}</span>
+                <button type="button" onClick={() => setPremiumNotice(null)}>
+                  Dismiss
+                </button>
+              </div>
+            ) : null}
             <div className={styles.deck}>
               {nextCandidate ? (
                 <div className={styles.previewCard} aria-hidden>
@@ -432,7 +468,11 @@ export default function Home() {
           </section>
 
           <section className={styles.challengeSection}>
-            <ChallengeEventHub />
+            <ChallengeEventHub
+              view={challengeView}
+              accessibleEvents={eventPartition.accessible}
+              lockedEvents={eventPartition.locked}
+            />
           </section>
 
           <section className={styles.chatSection}>
@@ -450,6 +490,20 @@ export default function Home() {
         </div>
 
         <aside className={styles.sidebar}>
+          <section className={styles.panel}>
+            <PremiumSubscriptionPanel
+              plan={premium.plan}
+              allowance={premium.allowance}
+              whoLikedMe={premium.whoLikedMe}
+              subscription={premium.subscription}
+              lockedEvents={eventPartition.locked}
+              isProcessing={premium.isProcessingCheckout}
+              checkoutError={premium.checkoutError}
+              onUpgrade={() =>
+                premium.startCheckout({ walletAddress: "0xseeker" }).catch(() => undefined)
+              }
+            />
+          </section>
           <section className={styles.panel}>
             <h3>Your crypto fingerprint</h3>
             <PersonalityHighlight assessment={seekerAssessment} />

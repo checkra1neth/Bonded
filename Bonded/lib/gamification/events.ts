@@ -72,6 +72,7 @@ export function createWeeklyEventSchedule(
     ],
     agenda: defaultAgenda(challenge.focusAreas[0] ?? "DeFi", host),
     recommendedRoles: ["strategist", "researcher"],
+    access: "standard",
   });
 
   const artWalkStart = addHours(challenge.startsAt, HOURS_IN_DAY * 2 + 5);
@@ -91,6 +92,12 @@ export function createWeeklyEventSchedule(
     resources: ["POAP mint link", "Artist roster", "Gallery playlist"],
     agenda: defaultAgenda("culture", "Culture curator node"),
     recommendedRoles: ["curator", "community"],
+    access: "premium",
+    premiumPerks: [
+      "Backstage meet & greet with featured artists",
+      "Token-gated mint allowlist airdrop",
+      "Premium lounge voice room with curator Q&A",
+    ],
   });
 
   const retroStart = addHours(challenge.endsAt, -6);
@@ -103,7 +110,7 @@ export function createWeeklyEventSchedule(
     focusAreas: challenge.focusAreas,
     startTime: retroStart,
     endTime: addHours(retroStart, 1.25),
-    host: "Challenge operations", 
+    host: "Challenge operations",
     location: "Base HQ voice",
     capacity: 50,
     vibe: "Reflective + actionable",
@@ -132,6 +139,7 @@ export function createWeeklyEventSchedule(
       },
     ],
     recommendedRoles: ["strategist", "host", "researcher"],
+    access: "standard",
   });
 
   return events;
