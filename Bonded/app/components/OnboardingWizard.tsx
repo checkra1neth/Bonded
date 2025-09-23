@@ -14,6 +14,7 @@ import {
   type ActivityVisibilityLevel,
   type PortfolioPrivacyPreferences,
   type PortfolioVisibilityLevel,
+  type TransactionVisibilityLevel,
 } from "../../lib/portfolio/privacy";
 import type { AllocationBucket, ActivityPeriod, RiskTolerance } from "../../lib/portfolio/types";
 
@@ -95,6 +96,66 @@ const ACTIVITY_LABELS: Record<ActivityPeriod, string> = {
   evening: "Evening (16–20)",
   late_night: "Late night (20–24)",
 };
+
+type AdvancedPrivacyKey = keyof Pick<
+  PortfolioPrivacyPreferences,
+  | "maskTokenConviction"
+  | "maskTokenChains"
+  | "maskDefiStrategies"
+  | "maskDefiRisks"
+  | "maskNftThemes"
+  | "maskActivityRisk"
+  | "redactHighlights"
+  | "shareTransactions"
+>;
+
+const advancedPrivacyOptions: Array<{
+  key: AdvancedPrivacyKey;
+  label: string;
+  description: string;
+}> = [
+  {
+    key: "maskTokenConviction",
+    label: "Hide conviction labels",
+    description: "Only surface allocation buckets for shared tokens.",
+  },
+  {
+    key: "maskTokenChains",
+    label: "Mask chain provenance",
+    description: "Keep Base/L2 chain metadata private.",
+  },
+  {
+    key: "maskDefiStrategies",
+    label: "Redact strategy notes",
+    description: "Show protocols without exposing your playbook.",
+  },
+  {
+    key: "maskDefiRisks",
+    label: "Hide risk scores",
+    description: "Protect your risk tolerance from public view.",
+  },
+  {
+    key: "maskNftThemes",
+    label: "Redact NFT themes",
+    description: "Share ownership signals without art themes.",
+  },
+  {
+    key: "maskActivityRisk",
+    label: "Mask activity risk",
+    description: "Display timezone sync without risk alignment.",
+  },
+  {
+    key: "redactHighlights",
+    label: "Redact highlight details",
+    description: "Replace milestones with privacy-safe summaries.",
+  },
+];
+
+const transactionVisibilityOptions: Array<{ value: TransactionVisibilityLevel; label: string }> = [
+  { value: "ANONYMIZED", label: "Anonymized buckets" },
+  { value: "SUMMARY", label: "Privacy-safe summary" },
+  { value: "HIDDEN", label: "Hidden" },
+];
 
 const relationshipIntentOptions = [
   {
@@ -268,6 +329,28 @@ export function OnboardingWizard({ profile, assessment }: OnboardingWizardProps)
       }));
     };
 
+  const handleAdvancedPrivacyToggle = (key: AdvancedPrivacyKey) => {
+    setPrivacyPreferences((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const handleTransactionVisibilityChange = (value: TransactionVisibilityLevel) => {
+    setPrivacyPreferences((prev) => ({
+      ...prev,
+      transactionVisibility: value,
+    }));
+  };
+
+  const handleTransactionWindowChange = (value: number) => {
+    const normalized = Math.min(365, Math.max(1, Math.round(value)));
+    setPrivacyPreferences((prev) => ({
+      ...prev,
+      transactionWindowDays: normalized,
+    }));
+  };
+
   const handleInterestToggle = (interestId: string) => {
     setProfileForm((prev) => ({
       ...prev,
@@ -310,7 +393,8 @@ export function OnboardingWizard({ profile, assessment }: OnboardingWizardProps)
           privacyPreferences.shareDefi ||
           privacyPreferences.shareNfts ||
           privacyPreferences.shareActivity ||
-          privacyPreferences.shareHighlights;
+          privacyPreferences.shareHighlights ||
+          privacyPreferences.shareTransactions;
 
         if (!shareSomething) {
           return { valid: false, message: "Select at least one portfolio element to share." };
@@ -506,6 +590,19 @@ export function OnboardingWizard({ profile, assessment }: OnboardingWizardProps)
     const nftCount = sanitizedPortfolio.nftCollections.length;
     const activityPeriods = sanitizedPortfolio.activity?.activePeriods ?? [];
     const timezone = sanitizedPortfolio.activity?.timezone;
+    const transactionSummary = sanitizedPortfolio.transactions;
+    const firstTransactionBucket = transactionSummary?.buckets[0];
+    const transactionPreview = !privacyPreferences.shareTransactions
+      ? "Hidden"
+      : transactionSummary && transactionSummary.buckets.length
+        ? `${firstTransactionBucket?.inboundCount ?? 0} inbound / ${
+            firstTransactionBucket?.outboundCount ?? 0
+          } outbound`
+        : "No recent activity in window";
+    const counterpartyPreview =
+      privacyPreferences.shareTransactions && transactionSummary?.notableCounterparties.length
+        ? transactionSummary.notableCounterparties[0]
+        : null;
 
     return (
       <div className={styles.stepCard}>
@@ -564,6 +661,67 @@ export function OnboardingWizard({ profile, assessment }: OnboardingWizardProps)
                 shareHighlights: event.target.checked,
               })),
             "Show curated achievements like hackathons, DAOs, and Base milestones.",
+          )}
+        </div>
+
+        <div className={styles.advancedPrivacy}>
+          <h4>Advanced privacy filters</h4>
+          <div className={styles.privacyGrid}>
+            {advancedPrivacyOptions.map(({ key, label, description }) =>
+              shareToggle(label, Boolean(privacyPreferences[key]), () => handleAdvancedPrivacyToggle(key), description),
+            )}
+          </div>
+        </div>
+
+        <div className={styles.transactionPrivacy}>
+          {shareToggle(
+            "Share anonymized transaction flow",
+            privacyPreferences.shareTransactions,
+            (event) =>
+              setPrivacyPreferences((prev) => ({
+                ...prev,
+                shareTransactions: event.target.checked,
+              })),
+            "Publish bucketed inbound/outbound counts with masked counterparties.",
+          )}
+
+          {privacyPreferences.shareTransactions ? (
+            <div className={styles.transactionControls}>
+              <label>
+                <span>Visibility mode</span>
+                <select
+                  value={privacyPreferences.transactionVisibility}
+                  onChange={(event) =>
+                    handleTransactionVisibilityChange(event.target.value as TransactionVisibilityLevel)
+                  }
+                >
+                  {transactionVisibilityOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Rolling window (days)</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={privacyPreferences.transactionWindowDays}
+                  onChange={(event) =>
+                    handleTransactionWindowChange(Number.parseInt(event.target.value, 10))
+                  }
+                />
+              </label>
+              <p>
+                We hash counterparties and bucket flows so your exact transaction history never leaves the vault.
+              </p>
+            </div>
+          ) : (
+            <p className={styles.transactionHint}>
+              Leave disabled to keep all transaction cadence data completely private.
+            </p>
           )}
         </div>
 
@@ -683,7 +841,19 @@ export function OnboardingWizard({ profile, assessment }: OnboardingWizardProps)
               <strong>Activity</strong>
               <span>
                 {privacyPreferences.shareActivity && sanitizedPortfolio.activity
-                  ? `${timezone} • ${activityPeriods.map((period) => ACTIVITY_LABELS[period]).join(" · ")}`
+                  ? `${timezone ?? "Timezone hidden"} • ${
+                      activityPeriods.length
+                        ? activityPeriods.map((period) => ACTIVITY_LABELS[period]).join(" · ")
+                        : "No active hours"
+                    }`
+                  : "Hidden"}
+              </span>
+            </li>
+            <li>
+              <strong>Transactions</strong>
+              <span>
+                {privacyPreferences.shareTransactions
+                  ? `${transactionPreview}${counterpartyPreview ? ` • ${counterpartyPreview}` : ""}`
                   : "Hidden"}
               </span>
             </li>

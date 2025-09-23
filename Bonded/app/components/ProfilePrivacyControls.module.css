@@ -86,6 +86,64 @@
   color: color-mix(in srgb, var(--foreground) 60%, transparent);
 }
 
+.advancedSection {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.advancedHeader h5 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.advancedHeader p {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--foreground) 58%, transparent);
+}
+
+.advancedGrid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.transactionSection {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.transactionControls {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.transactionControls label span {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+  margin-bottom: 0.35rem;
+}
+
+.transactionControls select,
+.transactionControls input {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 3%, transparent);
+  color: inherit;
+  font: inherit;
+}
+
+.transactionCopy {
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
 .allowList label span {
   display: block;
   font-size: 0.85rem;

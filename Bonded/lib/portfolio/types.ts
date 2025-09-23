@@ -9,6 +9,21 @@ export interface TokenHolding {
   chain?: string;
 }
 
+export type TransactionDirection = "inbound" | "outbound" | "self";
+
+export interface PortfolioTransaction {
+  id: string;
+  hash?: string | null;
+  timestamp: number;
+  direction: TransactionDirection;
+  counterparty: string;
+  counterpartyType?: "protocol" | "user" | "bridge" | "contract" | "unknown";
+  protocol?: string;
+  asset?: string | null;
+  valueUsd?: number | null;
+  note?: string | null;
+}
+
 export interface DeFiProtocol {
   name: string;
   category: "lending" | "dex" | "staking" | "perps" | "yield" | "infrastructure";
@@ -35,6 +50,7 @@ export interface PortfolioSnapshot {
   nftCollections: NFTCollection[];
   activity: ActivityPattern;
   highlights?: string[];
+  transactions?: PortfolioTransaction[];
 }
 
 export type AllocationBucket = "dominant" | "significant" | "diversified" | "exploratory";
@@ -50,11 +66,13 @@ export interface SanitizedTokenHolding extends Omit<TokenHolding, "allocation"> 
   allocationBucket: AllocationBucket;
 }
 
+export type SanitizedRiskTolerance = RiskTolerance | "withheld";
+
 export interface SanitizedActivityPattern {
   timezone: string;
   activePeriods: ActivityPeriod[];
   tradingFrequency: TradingFrequency;
-  riskTolerance: RiskTolerance;
+  riskTolerance: SanitizedRiskTolerance;
 }
 
 export interface SanitizedPortfolioSnapshot {
@@ -63,4 +81,31 @@ export interface SanitizedPortfolioSnapshot {
   nftCollections: NFTCollection[];
   activity: SanitizedActivityPattern | null;
   highlights: string[];
+  transactions: SanitizedTransactionHistory | null;
+}
+
+export type TransactionPrivacyLevel = "HIDDEN" | "ANONYMIZED" | "SUMMARY";
+
+export type TransactionVolumeBucket = "minimal" | "moderate" | "active" | "high";
+
+export type TransactionFlowDelta = "positive" | "neutral" | "negative";
+
+export interface SanitizedTransactionBucket {
+  period: "24h" | "7d" | "30d" | "90d" | "lifetime";
+  inboundCount: number;
+  outboundCount: number;
+  selfCount: number;
+  volumeBucket: TransactionVolumeBucket;
+  netFlow: TransactionFlowDelta;
+}
+
+export interface SanitizedTransactionHistory {
+  visibility: TransactionPrivacyLevel;
+  buckets: SanitizedTransactionBucket[];
+  notableCounterparties: string[];
+  anonymization: {
+    method: "hash_truncation" | "bucketing" | "masking";
+    lastUpdated: number;
+    windowDays: number;
+  };
 }

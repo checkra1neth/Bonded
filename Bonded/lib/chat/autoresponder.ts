@@ -1,9 +1,11 @@
 import type {
   ChatMessage,
+  ChatMessageEncryption,
   ChatMessageKind,
   ChatMessageMetadata,
   ChatParticipant,
 } from "./types";
+import { maskPreview } from "./encryption";
 
 const FALLBACK_RESPONSES = [
   "Love that energy. Want to trade governance alpha sometime soon?",
@@ -117,7 +119,12 @@ export function toDeliveredMessage(
   sender: ChatParticipant,
   body: string,
   timestamp: number,
-  options: { kind?: ChatMessageKind; metadata?: ChatMessageMetadata } = {},
+  options: {
+    kind?: ChatMessageKind;
+    metadata?: ChatMessageMetadata;
+    preview?: string;
+    encryption?: ChatMessageEncryption;
+  } = {},
 ): ChatMessage {
   return {
     id: crypto.randomUUID(),
@@ -131,5 +138,7 @@ export function toDeliveredMessage(
     status: "delivered",
     createdAt: timestamp,
     deliveredAt: timestamp,
+    preview: options.preview ?? maskPreview(body),
+    encryption: options.encryption,
   };
 }

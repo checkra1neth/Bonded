@@ -15,6 +15,7 @@ import {
 } from "@/lib/chat/state";
 import { createAutoResponse, toDeliveredMessage } from "@/lib/chat/autoresponder";
 import type { ChatMessage, ChatParticipant, ClientEvent, ServerEvent } from "@/lib/chat/types";
+import { encryptChatMessage, scrubMessageForTransmission } from "@/lib/chat/encryption";
 
 export const runtime = "edge";
 
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest) {
         handleInit(server, context, payload);
         break;
       case "message":
-        handleIncomingMessage(server, context, payload);
+        void handleIncomingMessage(server, context, payload);
         break;
       case "read":
         handleReadReceipt(context, payload);
@@ -128,7 +129,7 @@ function handleInit(socket: WebSocket, context: ConnectionContext, payload: Extr
   }
 }
 
-function handleIncomingMessage(
+async function handleIncomingMessage(
   socket: WebSocket,
   context: ConnectionContext,
   payload: Extract<ClientEvent, { type: "message" }>,
@@ -143,13 +144,19 @@ function handleIncomingMessage(
     displayName: payload.senderName,
     avatarColor: payload.senderAvatarColor,
   };
-  const message = toDeliveredMessage(
-    context.conversationId,
-    sender,
-    payload.body,
-    timestamp,
-    { kind: payload.kind, metadata: payload.metadata },
-  );
+  const { payload: encryption, preview } = await encryptChatMessage(context.conversationId, payload.body, {
+    associatedData: {
+      senderId: sender.userId,
+      conversationId: context.conversationId,
+    },
+  });
+
+  const message = toDeliveredMessage(context.conversationId, sender, payload.body, timestamp, {
+    kind: payload.kind,
+    metadata: payload.metadata,
+    encryption,
+    preview,
+  });
   appendMessage(context.conversationId, message);
 
   broadcastMessage(context.conversationId, message, payload.tempId, sender.userId);
@@ -214,12 +221,14 @@ function broadcastMessage(
   senderId: string,
 ) {
   for (const connection of listConnections(conversationId)) {
+    const includePlaintext = connection.participant.userId === senderId;
+    const payloadMessage = scrubMessageForTransmission(message, { includePlaintext });
     const payload: ServerEvent & { tempId?: string } = {
       type: "message",
       conversationId,
-      message,
+      message: payloadMessage,
     };
-    if (connection.participant.userId === senderId && tempId) {
+    if (includePlaintext && tempId) {
       payload.tempId = tempId;
     }
     try {
@@ -253,36 +262,47 @@ function scheduleAutoResponse(conversationId: string, peer: ChatParticipant) {
     broadcast(conversationId, { ...typingEvent, isTyping: false });
   }, plan.typingDuration);
 
-  const timeout = setTimeout(() => {
+  const timeout = setTimeout(async () => {
     clearTimeout(typingStop);
     broadcast(conversationId, { ...typingEvent, isTyping: false });
 
-    const timestamp = Date.now();
-    const message = toDeliveredMessage(conversationId, peer, plan.body, timestamp, { kind: "text" });
-    appendMessage(conversationId, message);
-    broadcastMessage(conversationId, message, undefined, peer.userId);
+    try {
+      const timestamp = Date.now();
+      const { payload: encryption, preview } = await encryptChatMessage(conversationId, plan.body, {
+        associatedData: { senderId: peer.userId, conversationId },
+      });
+      const message = toDeliveredMessage(conversationId, peer, plan.body, timestamp, {
+        kind: "text",
+        encryption,
+        preview,
+      });
+      appendMessage(conversationId, message);
+      broadcastMessage(conversationId, message, undefined, peer.userId);
 
-    const pendingReads = listMessages(conversationId).filter(
-      (entry) => entry.senderId !== peer.userId && entry.status !== "read",
-    );
+      const pendingReads = listMessages(conversationId).filter(
+        (entry) => entry.senderId !== peer.userId && entry.status !== "read",
+      );
 
-    if (pendingReads.length) {
-      const readAt = Date.now() + 400;
-      setTimeout(() => {
-        for (const item of pendingReads) {
-          const updated = updateMessageStatus(conversationId, item.id, "read", readAt);
-          if (updated) {
-            broadcast(conversationId, {
-              type: "message:status",
-              conversationId,
-              messageId: updated.id,
-              status: "read",
-              at: readAt,
-              actorId: peer.userId,
-            });
+      if (pendingReads.length) {
+        const readAt = Date.now() + 400;
+        setTimeout(() => {
+          for (const item of pendingReads) {
+            const updated = updateMessageStatus(conversationId, item.id, "read", readAt);
+            if (updated) {
+              broadcast(conversationId, {
+                type: "message:status",
+                conversationId,
+                messageId: updated.id,
+                status: "read",
+                at: readAt,
+                actorId: peer.userId,
+              });
+            }
           }
-        }
-      }, 400);
+        }, 400);
+      }
+    } catch (error) {
+      console.error("auto response encryption failed", error);
     }
 
     clearPendingAutoResponse(conversationId);
