@@ -1,4 +1,5 @@
 import { Errors, createClient } from "@farcaster/quick-auth";
+import { getServerEnv } from "../config/env";
 import { DEFAULT_DEV_FID, DEV_TOKEN_PREFIX } from "./constants";
 import { MissingFarcasterTokenError } from "./errors";
 
@@ -10,6 +11,8 @@ export type SiwfVerificationResult = {
 };
 
 export async function verifyFarcasterToken(token: string | undefined, domain: string): Promise<SiwfVerificationResult> {
+  const env = getServerEnv();
+
   if (token && !token.startsWith(DEV_TOKEN_PREFIX)) {
     try {
       const payload = await quickAuthClient.verifyJwt({ token, domain });
@@ -25,12 +28,12 @@ export async function verifyFarcasterToken(token: string | undefined, domain: st
     }
   }
 
-  if (process.env.NODE_ENV === "production") {
+  if (env.NODE_ENV === "production") {
     throw new MissingFarcasterTokenError();
   }
 
   const fallbackValue = token?.slice(DEV_TOKEN_PREFIX.length);
-  const devFid = fallbackValue ?? process.env.AUTH_DEV_FID ?? DEFAULT_DEV_FID.toString();
+  const devFid = fallbackValue ?? env.AUTH_DEV_FID ?? DEFAULT_DEV_FID.toString();
   const parsedFid = Number.parseInt(devFid, 10);
 
   if (!Number.isFinite(parsedFid)) {

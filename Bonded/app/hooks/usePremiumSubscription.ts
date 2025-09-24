@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import type { MatchDecision } from "@/lib/matching/compatibility";
 import type { MatchQueueState } from "@/lib/matching/queue";
+import { getPublicEnv } from "../../lib/config/public-env";
 import {
   BasePaySubscriptionGateway,
   buildPremiumProfileHighlight,
@@ -68,8 +69,8 @@ export interface UsePremiumSubscriptionResult {
   exclusiveContent: PremiumContentItem[];
 }
 
-const APP_ID = process.env.NEXT_PUBLIC_BASE_PAY_APP_ID ?? "bonded-app";
-const SECRET = process.env.NEXT_PUBLIC_BASE_PAY_PUBLISHABLE_KEY ?? "bonded-founders";
+const APP_ID = getPublicEnv("NEXT_PUBLIC_BASE_PAY_APP_ID") || "bonded-app";
+const SECRET = getPublicEnv("NEXT_PUBLIC_BASE_PAY_PUBLISHABLE_KEY") || "bonded-founders";
 
 export function usePremiumSubscription(
   options: UsePremiumSubscriptionOptions = {},

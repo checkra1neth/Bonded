@@ -7,6 +7,8 @@ import type {
   IcebreakerGeneratorConfig,
   MarketInsight,
 } from "./types";
+import { getServerEnv } from "../config/env";
+import { logger } from "../observability/logger";
 
 const DEFAULT_MODEL = "gpt-4o-mini";
 const DEFAULT_ENDPOINT = "https://api.openai.com/v1/chat/completions";
@@ -95,8 +97,8 @@ export class IcebreakerGenerator {
   private readonly timeoutMs?: number;
 
   constructor(config: IcebreakerGeneratorConfig = {}) {
-    this.apiKey =
-      config.apiKey ?? process.env.OPENAI_API_KEY ?? process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+    const env = getServerEnv();
+    this.apiKey = config.apiKey ?? env.OPENAI_API_KEY ?? env.NEXT_PUBLIC_OPENAI_API_KEY;
     this.model = config.model ?? DEFAULT_MODEL;
     this.endpoint = config.endpoint ?? DEFAULT_ENDPOINT;
     this.organization = config.organization;
@@ -125,7 +127,7 @@ export class IcebreakerGenerator {
           return normalized.slice(0, maxResults);
         }
       } catch (error) {
-        console.warn("OpenAI icebreaker generation failed, falling back to heuristics", error);
+        logger.warn("OpenAI icebreaker generation failed, falling back to heuristics", { error });
       }
     }
 

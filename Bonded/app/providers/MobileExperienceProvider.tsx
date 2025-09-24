@@ -11,6 +11,7 @@ import React, {
   type ReactNode,
 } from "react";
 import miniAppSdk from "@farcaster/miniapp-sdk";
+import { getPublicEnv } from "../../lib/config/public-env";
 
 import {
   startMobilePerformanceMonitor,
@@ -588,7 +589,7 @@ export function MobileExperienceProvider({
       }
 
       const options: PushSubscriptionOptionsInit = { userVisibleOnly: true };
-      const applicationServerKey = process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY;
+      const applicationServerKey = getPublicEnv("NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY");
       if (applicationServerKey) {
         options.applicationServerKey = urlBase64ToUint8Array(applicationServerKey);
       }

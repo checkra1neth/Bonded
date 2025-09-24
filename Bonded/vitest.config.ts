@@ -11,11 +11,21 @@ export default defineConfig({
       ["app/**/*.test.tsx", "jsdom"],
       ["lib/mobile/**/*.test.ts", "jsdom"],
     ],
-    include: ["lib/**/*.test.ts", "app/**/*.test.tsx"],
+    include: ["lib/**/*.test.ts", "app/**/*.test.tsx", "tests/**/*.test.ts"],
     coverage: {
       enabled: false,
       provider: "v8",
     },
+    alias: [
+      {
+        find: /^@\//,
+        replacement: `${resolve(rootDir, ".")}/`,
+      },
+      {
+        find: /^@$/,
+        replacement: resolve(rootDir, "."),
+      },
+    ],
   },
   resolve: {
     alias: [

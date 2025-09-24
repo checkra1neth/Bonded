@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import type { ChatConnectionStatus } from "../hooks/useChatSession";
 import type { FollowUpNoteRecord } from "../hooks/useFollowUpNotes";

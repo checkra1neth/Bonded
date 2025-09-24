@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify, type JWTPayload } from "jose";
+import { getServerEnv } from "../config/env";
 import {
   DEFAULT_DEV_FID,
   DEV_TOKEN_PREFIX,
@@ -43,10 +44,11 @@ let cachedSecret: Uint8Array | null = null;
 let cachedSecretSource: string | null = null;
 
 function getSecretKey() {
-  const configuredSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+  const env = getServerEnv();
+  const configuredSecret = env.AUTH_SECRET ?? env.NEXTAUTH_SECRET;
 
   if (!configuredSecret) {
-    if (process.env.NODE_ENV === "production") {
+    if (env.NODE_ENV === "production") {
       throw new SessionVerificationError("AUTH_SECRET must be configured in production environments");
     }
 
