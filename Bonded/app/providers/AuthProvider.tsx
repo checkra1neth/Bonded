@@ -7,10 +7,12 @@ import { useAccount, useDisconnect, useSignMessage } from "wagmi";
 import type { SessionUser } from "@/lib/auth/session";
 import { formatAddress } from "@/lib/auth/wallet";
 import { withRetry, type RetryOptions } from "@/lib/errors/retry";
+import { getPublicEnv } from "../../lib/config/public-env";
 
 import { useErrorHandling } from "../hooks/useErrorHandling";
 
 const DEV_TOKEN_PREFIX = "dev-";
+const DEV_FID = getPublicEnv("NEXT_PUBLIC_AUTH_DEV_FID") || "777777";
 
 export type AuthStatus = "initializing" | "unauthenticated" | "authenticating" | "authenticated" | "error";
 
@@ -37,8 +39,7 @@ async function requestSiwfToken(): Promise<string | undefined> {
   }
 
   if (process.env.NODE_ENV !== "production") {
-    const fallbackFid = process.env.NEXT_PUBLIC_AUTH_DEV_FID ?? "777777";
-    return `${DEV_TOKEN_PREFIX}${fallbackFid}`;
+    return `${DEV_TOKEN_PREFIX}${DEV_FID}`;
   }
 
   return undefined;

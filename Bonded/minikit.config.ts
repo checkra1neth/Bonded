@@ -1,4 +1,6 @@
-const ROOT_URL = process.env.NEXT_PUBLIC_URL || process.env.VERCEL_URL;
+import { resolveAppUrl } from "./lib/config/env";
+
+const ROOT_URL = resolveAppUrl().replace(/\/$/, "");
 
 /**
  * MiniApp configuration object. Must follow the Farcaster MiniApp specification.

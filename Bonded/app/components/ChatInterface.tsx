@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, CSSProperties, FormEvent } from "react";
 
-import type { MutualMatch } from "@/lib/matching/queue";
+import type { MutualMatch } from "../../lib/matching/queue";
 import type {
   CompatibilityProfile,
   MatchCandidate,
-} from "@/lib/matching/compatibility";
+} from "../../lib/matching/compatibility";
 import {
   planBasePayGift,
   planChallengeInvitation,
@@ -21,16 +21,16 @@ import {
   type PhotoSharePlanInput,
   type ReactionPlanInput,
   type VoiceNotePlanInput,
-} from "@/lib/chat/advancedMessages";
-import { extractReactions } from "@/lib/chat/reactions";
-import type { ChatParticipant } from "@/lib/chat/types";
+} from "../../lib/chat/advancedMessages";
+import { extractReactions } from "../../lib/chat/reactions";
+import type { ChatParticipant } from "../../lib/chat/types";
 import type {
   ActivityVisibilityLevel,
   PortfolioPrivacyPreferencesInput,
   PortfolioVisibilityLevel,
-} from "@/lib/portfolio/privacy";
+} from "../../lib/portfolio/privacy";
 
-import { notifyChatMessage } from "@/lib/mobile/notifications";
+import { notifyChatMessage } from "../../lib/mobile/notifications";
 
 import { useMobileExperience } from "../hooks/useMobileExperience";
 import { useChatSession } from "../hooks/useChatSession";

@@ -1,6 +1,8 @@
 import { createHash } from "crypto";
 import { createPublicClient, getAddress, http, isAddress } from "viem";
 import { base, mainnet } from "viem/chains";
+import { getServerEnv } from "../config/env";
+import { logger } from "../observability/logger";
 import { IdentityResolutionError, InvalidAddressError } from "./errors";
 
 export type WalletIdentity = {
@@ -13,8 +15,9 @@ export type WalletIdentity = {
   isSmartContract: boolean;
 };
 
-const defaultBaseRpc = process.env.BASE_RPC_URL ?? "https://mainnet.base.org";
-const defaultEthereumRpc = process.env.ETHEREUM_RPC_URL ?? "https://eth.llamarpc.com";
+const serverEnv = getServerEnv();
+const defaultBaseRpc = serverEnv.BASE_RPC_URL ?? "https://mainnet.base.org";
+const defaultEthereumRpc = serverEnv.ETHEREUM_RPC_URL ?? "https://eth.llamarpc.com";
 
 const baseClient = createPublicClient({
   chain: base,
@@ -37,7 +40,8 @@ export async function resolveWalletIdentity(address: string): Promise<WalletIden
   }
 
   const checksumAddress = getAddress(address);
-  const disableNetwork = process.env.AUTH_DISABLE_NETWORK === "true";
+  const env = getServerEnv();
+  const disableNetwork = env.AUTH_DISABLE_NETWORK === "true";
 
   let isSmartContract = false;
 
@@ -46,7 +50,7 @@ export async function resolveWalletIdentity(address: string): Promise<WalletIden
       const bytecode = await baseClient.getBytecode({ address: checksumAddress });
       isSmartContract = bytecode !== undefined && bytecode !== "0x";
     } catch (error) {
-      console.warn("Unable to inspect Base address bytecode", error);
+      logger.warn("Unable to inspect Base address bytecode", { error });
     }
   }
 
@@ -56,12 +60,12 @@ export async function resolveWalletIdentity(address: string): Promise<WalletIden
     try {
       ensName = await mainnetClient.getEnsName({ address: checksumAddress });
     } catch (error) {
-      console.warn("Unable to resolve ENS name", error);
+      logger.warn("Unable to resolve ENS name", { error });
     }
   }
 
   let basename: string | null = null;
-  const resolverEndpoint = process.env.BASENAME_RESOLVER_URL?.trim();
+  const resolverEndpoint = env.BASENAME_RESOLVER_URL?.trim();
 
   if (!disableNetwork && resolverEndpoint && typeof fetch === "function") {
     const normalizedEndpoint = resolverEndpoint.endsWith("/")
@@ -75,7 +79,7 @@ export async function resolveWalletIdentity(address: string): Promise<WalletIden
         basename = payload.basename ?? payload.name ?? null;
       }
     } catch (error) {
-      console.warn("Unable to resolve Basename", error);
+      logger.warn("Unable to resolve Basename", { error, endpoint: normalizedEndpoint });
     }
   }
 
@@ -88,8 +92,9 @@ export async function resolveWalletIdentity(address: string): Promise<WalletIden
     : "fallback";
 
   if (!ensName && !basename && primarySource === "fallback" && disableNetwork) {
-    console.warn(
+    logger.warn(
       "Wallet identity resolution skipped network lookups. Falling back to deterministic Basename.",
+      { address: checksumAddress },
     );
   }
 

@@ -1,3 +1,6 @@
+import { logger } from "../observability/logger";
+import { telemetry } from "../observability/telemetry";
+
 export type ErrorSeverity = "info" | "warning" | "error" | "critical";
 
 export interface UserFacingErrorOptions {
@@ -59,7 +62,7 @@ function toMessage(error: unknown, fallback: string) {
 
   try {
     return JSON.stringify(error);
-  } catch (serializationError) {
+  } catch {
     return fallback;
   }
 }
@@ -104,11 +107,23 @@ export class ErrorMonitor {
     }
 
     if (severity === "error" || severity === "critical") {
-      // eslint-disable-next-line no-console
-      console.error(`[ErrorMonitor:${severity}] ${message}`, error, options.context);
+      logger.error(`[ErrorMonitor:${severity}] ${message}`, {
+        error,
+        context: options.context,
+      });
+
+      telemetry.trackError({
+        name: "Unhandled application error",
+        message,
+        severity,
+        stack: event.stack,
+        context: options.context,
+      });
     } else {
-      // eslint-disable-next-line no-console
-      console.warn(`[ErrorMonitor:${severity}] ${message}`, error, options.context);
+      logger.warn(`[ErrorMonitor:${severity}] ${message}`, {
+        error,
+        context: options.context,
+      });
     }
 
     this.listeners.forEach((listener) => listener(event));

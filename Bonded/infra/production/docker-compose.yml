@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bonded-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bonded}
+      POSTGRES_USER: ${POSTGRES_USER:-bonded}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-bonded}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bonded-production
+
+  backup:
+    image: prodrigestivill/postgres-backup-local:16
+    container_name: bonded-postgres-backup
+    restart: always
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-bonded}
+      POSTGRES_USER: ${POSTGRES_USER:-bonded}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: "7"
+      BACKUP_KEEP_WEEKS: "4"
+      BACKUP_KEEP_MONTHS: "6"
+      POSTGRES_EXTRA_OPTS: "-Z6 --schema=public"
+    volumes:
+      - postgres-backups:/backups
+    depends_on:
+      - postgres
+    networks:
+      - bonded-production
+
+  app:
+    image: bonded-app:latest
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-bonded}:${POSTGRES_PASSWORD:-change-me}@postgres:5432/${POSTGRES_DB:-bonded}
+      NEXT_PUBLIC_URL: https://app.bonded.xyz
+    ports:
+      - "3000:3000"
+    networks:
+      - bonded-production
+    restart: on-failure
+
+volumes:
+  postgres-data:
+  postgres-backups:
+
+networks:
+  bonded-production:
+    driver: bridge

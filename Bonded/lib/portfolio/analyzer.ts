@@ -8,6 +8,7 @@ import type {
   TransactionDirection,
   TradingFrequency,
 } from "./types";
+import { getServerEnv } from "../config/env";
 
 interface PortfolioAnalyzerOptions {
   apiKey?: string;
@@ -148,8 +149,8 @@ export class PortfolioAnalyzer {
   private readonly fallbackTimezoneOffset: number;
 
   constructor(options: PortfolioAnalyzerOptions = {}) {
-    const apiKey =
-      options.apiKey ?? process.env.ALCHEMY_BASE_API_KEY ?? process.env.ALCHEMY_API_KEY;
+    const env = getServerEnv();
+    const apiKey = options.apiKey ?? env.ALCHEMY_BASE_API_KEY ?? env.ALCHEMY_API_KEY;
 
     if (!apiKey) {
       throw new Error("Alchemy API key is required to analyze portfolios");

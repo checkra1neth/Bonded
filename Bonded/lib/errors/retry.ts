@@ -72,7 +72,6 @@ export async function withRetry<T>(
 
   let attempt = 0;
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     if (signal?.aborted) {
       throw createAbortError();

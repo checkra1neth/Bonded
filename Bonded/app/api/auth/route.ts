@@ -1,6 +1,8 @@
 import { Errors, createClient } from "@farcaster/quick-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestHost } from "@/lib/auth/utils";
+import { getRequestHost } from "../../../lib/auth/utils";
+import { logger } from "../../../lib/observability/logger";
+import { telemetry } from "../../../lib/observability/telemetry";
 
 const client = createClient();
 
@@ -11,6 +13,9 @@ export async function GET(request: NextRequest) {
 
   // Here we ensure that we have a valid token.
   if (!authorization || !authorization.startsWith("Bearer ")) {
+    logger.warn("Auth token request missing authorization header", {
+      path: request.nextUrl.pathname,
+    });
     return NextResponse.json({ message: "Missing token" }, { status: 401 });
   }
 
@@ -33,10 +38,25 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ userFid });
   } catch (e) {
     if (e instanceof Errors.InvalidTokenError) {
+      logger.warn("Invalid Farcaster token presented", {
+        path: request.nextUrl.pathname,
+      });
+      telemetry.trackEvent({
+        name: "auth.invalidToken", 
+        properties: { path: request.nextUrl.pathname },
+      });
       return NextResponse.json({ message: "Invalid token" }, { status: 401 });
     }
 
     if (e instanceof Error) {
+      logger.error("Unexpected error verifying Farcaster token", { error: e });
+      telemetry.trackError({
+        name: "auth.tokenVerificationFailed",
+        message: e.message,
+        severity: "error",
+        stack: e.stack,
+        context: { path: request.nextUrl.pathname },
+      });
       return NextResponse.json({ message: e.message }, { status: 500 });
     }
 

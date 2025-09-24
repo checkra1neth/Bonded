@@ -7,12 +7,15 @@ import "@coinbase/onchainkit/styles.css";
 import { AuthProvider } from "./providers/AuthProvider";
 import { ErrorHandlingProvider } from "./providers/ErrorHandlingProvider";
 import { MobileExperienceProvider } from "./providers/MobileExperienceProvider";
+import { getPublicEnv } from "../lib/config/public-env";
+
+const onchainKitApiKey = getPublicEnv("NEXT_PUBLIC_ONCHAINKIT_API_KEY");
 
 export function RootProvider({ children }: { children: ReactNode }) {
   return (
     <ErrorHandlingProvider>
       <OnchainKitProvider
-        apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+        apiKey={onchainKitApiKey || undefined}
         chain={base}
         config={{
           appearance: {
