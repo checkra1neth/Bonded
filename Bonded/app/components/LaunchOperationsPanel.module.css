@@ -1,0 +1,446 @@
+.panel {
+  display: grid;
+  gap: 1.75rem;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+  padding: clamp(1.5rem, 3vw, 2rem);
+}
+
+.header {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.header > div:first-child {
+  justify-self: flex-start;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ready {
+  background: rgba(46, 214, 161, 0.16);
+  color: rgba(20, 155, 115, 0.95);
+}
+
+.stabilizing {
+  background: rgba(255, 207, 86, 0.18);
+  color: rgba(190, 130, 0, 0.95);
+}
+
+.at_risk {
+  background: rgba(255, 115, 120, 0.2);
+  color: rgba(188, 48, 65, 0.95);
+}
+
+.headline {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.supporting {
+  margin-top: 0.25rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  line-height: 1.5;
+}
+
+.confidence {
+  display: grid;
+  justify-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+
+.confidence span {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.confidence small {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.card {
+  display: grid;
+  gap: 1rem;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  padding: 1.25rem;
+}
+
+.card h3 {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.checklist li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.checklistMeta {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.checklistMeta strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.statusDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  margin-top: 0.4rem;
+}
+
+.complete {
+  background: linear-gradient(135deg, #5f5bff, #00d1ff);
+}
+
+.in_progress {
+  background: linear-gradient(135deg, #ffb347, #ffcc33);
+}
+
+.blocked {
+  background: linear-gradient(135deg, #ff5f6d, #ffc371);
+}
+
+.checklistMetric {
+  display: grid;
+  gap: 0.15rem;
+  align-items: center;
+  justify-items: end;
+  text-align: right;
+}
+
+.checklistMetric span {
+  font-weight: 600;
+}
+
+.checklistMetric small {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.kpiGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.kpi {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.kpiLabel {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.kpiValueRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.kpiValueRow strong {
+  font-size: 1.4rem;
+}
+
+.trend {
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+
+.up {
+  color: rgba(18, 163, 107, 0.95);
+}
+
+.down {
+  color: rgba(200, 70, 70, 0.95);
+}
+
+.flat {
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+}
+
+.marketingList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.marketingList li {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.marketingMetric {
+  font-weight: 600;
+  color: color-mix(in srgb, var(--foreground) 75%, transparent);
+}
+
+.marketingFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.marketingFooter button {
+  border: none;
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.85), rgba(0, 209, 255, 0.85));
+  color: #fff;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.live {
+  background: rgba(46, 214, 161, 0.16);
+  color: rgba(20, 155, 115, 0.95);
+}
+
+.planned {
+  background: rgba(255, 207, 86, 0.18);
+  color: rgba(190, 130, 0, 0.95);
+}
+
+.draft {
+  background: rgba(255, 148, 112, 0.2);
+  color: rgba(195, 82, 52, 0.95);
+}
+
+.high {
+  background: rgba(255, 100, 120, 0.2);
+  color: rgba(191, 61, 78, 0.95);
+}
+
+.medium {
+  background: rgba(255, 191, 84, 0.22);
+  color: rgba(173, 120, 24, 0.95);
+}
+
+.low {
+  background: rgba(85, 193, 255, 0.2);
+  color: rgba(26, 132, 200, 0.95);
+}
+
+.online {
+  background: rgba(46, 214, 161, 0.16);
+  color: rgba(20, 155, 115, 0.95);
+}
+
+.standby {
+  background: rgba(255, 207, 86, 0.18);
+  color: rgba(190, 130, 0, 0.95);
+}
+
+.offline {
+  background: rgba(255, 115, 120, 0.18);
+  color: rgba(188, 48, 65, 0.95);
+}
+
+.analyticsSummary {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.analyticsSummary strong {
+  font-size: 1.1rem;
+}
+
+.analyticsSummary p {
+  margin-top: 0.35rem;
+  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+}
+
+.analyticsMetrics {
+  display: grid;
+  gap: 0.4rem;
+  text-align: right;
+}
+
+.analyticsMetrics span {
+  display: grid;
+  gap: 0.15rem;
+  justify-items: end;
+  font-weight: 600;
+}
+
+.analyticsMetrics small {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+
+.operations {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.operations ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.operations li {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.operations li > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.operations footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.operations footer button {
+  border: none;
+  background: rgba(95, 91, 255, 0.18);
+  color: rgba(71, 64, 255, 0.95);
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.noAlerts {
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  font-style: italic;
+}
+
+.supportList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.supportList li {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.supportMeta {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.supportMeta button {
+  border: none;
+  background: linear-gradient(135deg, rgba(95, 91, 255, 0.85), rgba(0, 209, 255, 0.85));
+  color: #fff;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.sla {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+}
+
+@media (max-width: 720px) {
+  .header {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

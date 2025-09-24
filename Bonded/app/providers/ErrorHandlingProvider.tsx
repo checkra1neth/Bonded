@@ -248,9 +248,10 @@ export function ErrorHandlingProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const timers = autoDismissTimers.current;
     return () => {
-      autoDismissTimers.current.forEach((timer) => clearTimeout(timer));
-      autoDismissTimers.current.clear();
+      timers.forEach((timer) => clearTimeout(timer));
+      timers.clear();
     };
   }, []);
 
