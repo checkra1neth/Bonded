@@ -8,6 +8,9 @@ import type { PortfolioSnapshot } from "@/lib/portfolio/types";
 import type { PersonalityAssessment } from "@/lib/personality/types";
 import { IcebreakerGenerator } from "@/lib/icebreakers";
 import { deliverIcebreakerSuggestions, type IcebreakerSuggestionResult } from "@/lib/icebreakers/delivery";
+import { withRetry } from "@/lib/errors/retry";
+
+import { useErrorHandling } from "./useErrorHandling";
 import {
   assignIcebreakerVariant,
   getVariantConfig,
@@ -51,6 +54,7 @@ export function useIcebreakerSuggestions({
   }
 
   const [records, setRecords] = useState<Record<string, IcebreakerSuggestionView>>({});
+  const { captureError } = useErrorHandling();
 
   useEffect(() => {
     setRecords((current) => {
@@ -146,15 +150,30 @@ export function useIcebreakerSuggestions({
     const deliver = async () => {
       for (const plan of plans) {
         try {
-          const result = await deliverIcebreakerSuggestions({
-            seekerProfile,
-            seekerPersonality,
-            candidate: plan.context.candidate,
-            candidatePortfolio: plan.context.portfolio,
-            match: plan.match,
-            generator,
-            variant: plan.variant,
-          });
+          const result = await withRetry(
+            () =>
+              deliverIcebreakerSuggestions({
+                seekerProfile,
+                seekerPersonality,
+                candidate: plan.context.candidate,
+                candidatePortfolio: plan.context.portfolio,
+                match: plan.match,
+                generator,
+                variant: plan.variant,
+              }),
+            {
+              retries: 2,
+              minTimeout: 400,
+              maxTimeout: 1_200,
+              onRetry: (retryError, attempt) => {
+                captureError(retryError, {
+                  message: "Retrying icebreaker delivery",
+                  severity: "warning",
+                  context: { scope: "icebreakers.delivery", matchId: plan.match.id, attempt: attempt + 1 },
+                });
+              },
+            },
+          );
 
           if (cancelled) {
             return;
@@ -173,6 +192,12 @@ export function useIcebreakerSuggestions({
           }
 
           const message = error instanceof Error ? error.message : String(error);
+
+          captureError(error, {
+            message: "Unable to deliver icebreaker suggestions",
+            severity: "warning",
+            context: { scope: "icebreakers.delivery", matchId: plan.match.id },
+          });
 
           setRecords((current) => ({
             ...current,
@@ -198,7 +223,7 @@ export function useIcebreakerSuggestions({
     return () => {
       cancelled = true;
     };
-  }, [matches, records, candidatesById, seekerProfile, seekerPersonality]);
+  }, [matches, records, candidatesById, seekerProfile, seekerPersonality, captureError]);
 
   const orderedSuggestions = useMemo(() => {
     return matches
