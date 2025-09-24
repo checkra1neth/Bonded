@@ -22,11 +22,15 @@ import { SocialEngagementPanel } from "./components/SocialEngagementPanel";
 import { PremiumFiltersPanel } from "./components/PremiumFiltersPanel";
 import { PremiumSuperLikeSpotlight } from "./components/PremiumSuperLikeSpotlight";
 import { PremiumExclusiveContentPanel } from "./components/PremiumExclusiveContentPanel";
+import { LaunchOperationsPanel } from "./components/LaunchOperationsPanel";
+import { FeedbackPanel } from "./components/FeedbackPanel";
 import styles from "./page.module.css";
 import { useMatchQueue } from "./hooks/useMatchQueue";
 import { usePremiumSubscription } from "./hooks/usePremiumSubscription";
 import { useChallengeHub } from "./hooks/useChallengeHub";
 import { useMobileExperience } from "./hooks/useMobileExperience";
+import { useLaunchMetrics } from "./hooks/useLaunchMetrics";
+import { useAnalytics } from "./hooks/useAnalytics";
 import {
   buildPremiumFilterFacets,
   buildSuperLikeSpotlightEntry,
@@ -279,6 +283,7 @@ export default function Home() {
   const pushPermission = push.permission;
   const pushSubscribed = push.subscribed;
   const pushPromptInFlight = push.isPromptInFlight;
+  const analytics = useAnalytics();
 
   const optimizationIntent = useMemo(
     () =>
@@ -634,6 +639,40 @@ export default function Home() {
     [challengeView.events, premium],
   );
 
+  const launchMetrics = useLaunchMetrics({
+    queueState,
+    positiveMatchCount: positiveMatches.length,
+    superLikeCount: superLikes.length,
+    mutualMatchCount: mutualMatches.length,
+    premiumActive: Boolean(premium.subscription),
+    premiumCheckoutCount: premium.checkoutSession ? 1 : 0,
+    push: {
+      supported: pushSupported,
+      permission: pushPermission,
+      subscribed: pushSubscribed,
+    },
+    serviceWorker: {
+      ready: serviceWorkerState.ready,
+      updateAvailable: serviceWorkerState.updateAvailable,
+    },
+    online,
+    performance,
+    marketingEvents: {
+      accessible: challengeView.events.length,
+      locked: eventPartition.locked.length,
+    },
+    analytics: {
+      totalEvents: analytics.totalEvents,
+      eventsByCategory: analytics.eventsByCategory,
+    },
+    baselineWaitlist: 4600,
+    initialFeedback: {
+      total: 26,
+      promoters: 18,
+      detractors: 3,
+    },
+  });
+
   const nextCandidate = queueState.entries.find((entry, index) => {
     if (queueState.activeIndex === -1) {
       return false;
@@ -871,6 +910,20 @@ export default function Home() {
           <section className={styles.socialSection}>
             <SocialEngagementPanel />
           </section>
+
+          <section className={styles.launchSection}>
+            <LaunchOperationsPanel
+              summary={launchMetrics.summary}
+              checklist={launchMetrics.checklist}
+              kpis={launchMetrics.kpis}
+              marketingHighlights={launchMetrics.marketingHighlights}
+              supportChannels={launchMetrics.supportChannels}
+              analyticsHealth={launchMetrics.analyticsHealth}
+              operations={launchMetrics.operations}
+              onAction={launchMetrics.trackAction}
+              onSupportSelect={launchMetrics.trackSupport}
+            />
+          </section>
         </div>
 
         <aside className={styles.sidebar}>
@@ -1000,6 +1053,10 @@ export default function Home() {
               <li>Viral compatibility reports for social amplification</li>
               <li>Weekly on-chain couple challenges with badges</li>
             </ul>
+          </section>
+
+          <section className={styles.panel}>
+            <FeedbackPanel stats={launchMetrics.feedback} onSubmitSuccess={launchMetrics.registerFeedback} />
           </section>
         </aside>
       </main>
