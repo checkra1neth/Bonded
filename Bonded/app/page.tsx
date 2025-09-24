@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   buildMatchCandidate,
   describeCategory,
-  type CandidateInteractionProfile,
   type CompatibilityProfile,
   type MatchCandidate,
   type MatchDecision,
@@ -27,6 +26,7 @@ import styles from "./page.module.css";
 import { useMatchQueue } from "./hooks/useMatchQueue";
 import { usePremiumSubscription } from "./hooks/usePremiumSubscription";
 import { useChallengeHub } from "./hooks/useChallengeHub";
+import { useMobileExperience } from "./hooks/useMobileExperience";
 import {
   buildPremiumFilterFacets,
   buildSuperLikeSpotlightEntry,
@@ -38,7 +38,13 @@ import {
   type PremiumFilterOptions,
   type SuperLikeSpotlightEntry,
 } from "@/lib/premium";
+import { notifyMutualMatch } from "@/lib/mobile/notifications";
 import { useIcebreakerSuggestions } from "./hooks/useIcebreakerSuggestions";
+import {
+  optimizeCandidateSeeds,
+  resolveOptimizationIntent,
+  type CandidateSeed,
+} from "@/lib/mobile/optimization";
 
 const SPOTLIGHT_LIMIT = 4;
 
@@ -121,11 +127,7 @@ const seekerProfile: CompatibilityProfile = {
   portfolio: seekerPortfolio,
 };
 
-const candidateSeeds: Array<{
-  user: CompatibilityProfile["user"];
-  portfolio: CompatibilityProfile["portfolio"];
-  interaction?: CandidateInteractionProfile;
-}> = [
+const candidateSeeds: ReadonlyArray<CandidateSeed> = [
   {
     user: {
       id: "nova-yield",
@@ -257,14 +259,84 @@ const candidateProfilesById = new Map<string, CompatibilityProfile>(
 );
 
 export default function Home() {
+  const {
+    connection,
+    isMobileViewport,
+    isStandalone,
+    online,
+    promptInstall,
+    serviceWorker,
+    push,
+    performance,
+  } = useMobileExperience();
+
+  const serviceWorkerState = serviceWorker.state;
+  const activateServiceWorkerUpdate = serviceWorker.activateUpdate;
+  const serviceWorkerRegistration = serviceWorker.registration;
+  const { requestPermission: requestPushPermission, subscribe: subscribeToPush } = push;
+  const seenMatchNotificationsRef = useRef<Set<string>>(new Set());
+  const pushSupported = push.supported;
+  const pushPermission = push.permission;
+  const pushSubscribed = push.subscribed;
+  const pushPromptInFlight = push.isPromptInFlight;
+
+  const optimizationIntent = useMemo(
+    () =>
+      resolveOptimizationIntent({
+        saveData: connection?.saveData,
+        effectiveType: connection?.effectiveType,
+      }),
+    [connection?.effectiveType, connection?.saveData],
+  );
+
+  const candidateLimit = useMemo(() => {
+    if (optimizationIntent === "data-saver") {
+      return Math.min(3, candidateSeeds.length);
+    }
+
+    if (optimizationIntent === "slow-network") {
+      return Math.min(5, candidateSeeds.length);
+    }
+
+    if (typeof connection?.downlink === "number" && connection.downlink < 2) {
+      return Math.min(6, candidateSeeds.length);
+    }
+
+    if (isMobileViewport) {
+      return Math.min(7, candidateSeeds.length);
+    }
+
+    return candidateSeeds.length;
+  }, [connection?.downlink, isMobileViewport, optimizationIntent]);
+
+  const optimizedSeeds = useMemo(
+    () =>
+      optimizeCandidateSeeds(candidateSeeds, {
+        limit: candidateLimit,
+        intent: optimizationIntent,
+      }),
+    [candidateLimit, optimizationIntent],
+  );
+
   const initialCandidates = useMemo(
     () =>
-      candidateProfiles.map((candidate, index) =>
-        buildMatchCandidate(seekerProfile, candidate, {
-          interaction: candidateSeeds[index]?.interaction,
-        }),
-      ),
-    [],
+      optimizedSeeds.map((seed) => {
+        const profile = candidateProfilesById.get(seed.user.id);
+        const compatibilityProfile =
+          profile ??
+          ({
+            user: {
+              ...seed.user,
+              personality: assessPersonality(seed.portfolio).type,
+            },
+            portfolio: seed.portfolio,
+          } satisfies CompatibilityProfile);
+
+        return buildMatchCandidate(seekerProfile, compatibilityProfile, {
+          interaction: seed.interaction,
+        });
+      }),
+    [optimizedSeeds],
   );
 
   const [premiumFilters, setPremiumFilters] = useState<PremiumFilterOptions>(
@@ -298,6 +370,149 @@ export default function Home() {
 
   const filterSummary = useMemo(() => summarizeFilters(premiumFilters), [premiumFilters]);
 
+  const handleInstallPrompt = useCallback(() => {
+    if (!promptInstall) {
+      return;
+    }
+
+    promptInstall().catch(() => undefined);
+  }, [promptInstall]);
+
+  const handleServiceWorkerUpdate = useCallback(() => {
+    activateServiceWorkerUpdate();
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
+  }, [activateServiceWorkerUpdate]);
+
+  const handleEnableNotifications = useCallback(() => {
+    if (!push.supported) {
+      return;
+    }
+    requestPushPermission()
+      .then((permission) => {
+        if (permission === "granted") {
+          return subscribeToPush();
+        }
+        return null;
+      })
+      .catch(() => undefined);
+  }, [push.supported, requestPushPermission, subscribeToPush]);
+
+  const handleResubscribeNotifications = useCallback(() => {
+    subscribeToPush().catch(() => undefined);
+  }, [subscribeToPush]);
+
+  const experienceHints = useMemo(
+    () => {
+      const hints: Array<{
+        id: string;
+        title: string;
+        description: string;
+        action?: { label: string; onClick: () => void };
+      }> = [];
+
+      if (!online) {
+        hints.push({
+          id: "offline",
+          title: "Offline mode",
+          description:
+            "You\u2019re browsing cached matches. We\u2019ll sync new data as soon as you reconnect.",
+        });
+      }
+
+      if (serviceWorkerState.updateAvailable) {
+        hints.push({
+          id: "update-available",
+          title: "Update ready",
+          description: "Refresh to load the latest Bonded experience.",
+          action: { label: "Refresh", onClick: handleServiceWorkerUpdate },
+        });
+      }
+
+      if (!isStandalone && promptInstall) {
+        hints.push({
+          id: "install",
+          title: "Install Bonded",
+          description:
+            "Add Bonded to your home screen for faster access and richer MiniKit support.",
+          action: { label: "Install", onClick: handleInstallPrompt },
+        });
+      }
+
+      if (pushSupported && pushPermission === "default") {
+        hints.push({
+          id: "push-enable",
+          title: "Enable notifications",
+          description:
+            "Turn on push alerts to get notified the moment a match messages you.",
+          action: {
+            label: pushPromptInFlight ? "Requesting\u2026" : "Enable",
+            onClick: handleEnableNotifications,
+          },
+        });
+      } else if (pushSupported && pushPermission === "denied") {
+        hints.push({
+          id: "push-denied",
+          title: "Notifications blocked",
+          description:
+            "Update your browser settings to allow notifications for Bonded and never miss a match alert.",
+        });
+      } else if (pushSupported && pushPermission === "granted" && !pushSubscribed) {
+        hints.push({
+          id: "push-resubscribe",
+          title: "Activate alerts",
+          description:
+            "Subscribe to match notifications to get real-time updates on new connections.",
+          action: { label: "Subscribe", onClick: handleResubscribeNotifications },
+        });
+      }
+
+      if (optimizationIntent === "data-saver") {
+        hints.push({
+          id: "data-saver",
+          title: "Data saver active",
+          description:
+            "We\u2019re trimming match insights to reduce data usage. Disable data saver for full detail.",
+        });
+      } else if (optimizationIntent === "slow-network") {
+        hints.push({
+          id: "slow-network",
+          title: "Optimized for slow network",
+          description:
+            "We detected a slower connection and are loading lighter match details for smoother swipes.",
+        });
+      }
+
+      if ((performance.lastFrameDuration ?? 0) > 80 || performance.slowFrameCount > 8) {
+        hints.push({
+          id: "performance",
+          title: "Optimize responsiveness",
+          description:
+            "We noticed a few slow frames. Closing other heavy tabs can keep swipes buttery smooth.",
+        });
+      }
+
+      return hints;
+    }, [
+      handleInstallPrompt,
+      handleServiceWorkerUpdate,
+      handleEnableNotifications,
+      handleResubscribeNotifications,
+      isStandalone,
+      online,
+      optimizationIntent,
+      performance.lastFrameDuration,
+      performance.slowFrameCount,
+      promptInstall,
+      pushPermission,
+      pushPromptInFlight,
+      pushSubscribed,
+      pushSupported,
+      serviceWorkerState.updateAvailable,
+    ],
+  );
+
   const handleFiltersChange = useCallback(
     (nextFilters: PremiumFilterOptions) => {
       setPremiumFilters(nextFilters);
@@ -329,6 +544,7 @@ export default function Home() {
   const decisionLog = [...queueState.decisions].sort((a, b) => b.createdAt - a.createdAt);
   const mutualMatches = [...queueState.matches].sort((a, b) => b.createdAt - a.createdAt);
   const notifications = queueState.notifications;
+  const hasNotifications = experienceHints.length > 0 || notifications.length > 0;
 
   const candidatesById = useMemo(() => {
     return queueState.entries.reduce(
@@ -362,6 +578,37 @@ export default function Home() {
       candidatesById,
     });
 
+  useEffect(() => {
+    if (!push.supported || push.permission !== "granted" || pushSubscribed) {
+      return;
+    }
+    subscribeToPush().catch(() => undefined);
+  }, [push.permission, push.supported, pushSubscribed, subscribeToPush]);
+
+  useEffect(() => {
+    if (!serviceWorkerRegistration || !push.supported || push.permission !== "granted") {
+      return;
+    }
+
+    const knownIds = seenMatchNotificationsRef.current;
+    const ids = new Set(notifications.map((notification) => notification.id));
+    knownIds.forEach((id) => {
+      if (!ids.has(id)) {
+        knownIds.delete(id);
+      }
+    });
+
+    notifications
+      .filter((notification) => notification.type === "mutual-match")
+      .forEach((notification) => {
+        if (notification.read || knownIds.has(notification.id)) {
+          return;
+        }
+        knownIds.add(notification.id);
+        notifyMutualMatch(serviceWorkerRegistration, notification).catch(() => undefined);
+      });
+  }, [notifications, push.permission, push.supported, serviceWorkerRegistration]);
+
   const premium = usePremiumSubscription({ planId: premiumPlan.id, queueState });
   const [premiumNotice, setPremiumNotice] = useState<string | null>(null);
 
@@ -373,10 +620,18 @@ export default function Home() {
     ? "Revisit your previous match instantly."
     : "Swipe to enable undo.";
 
+  useEffect(() => {
+    setSuperLikeSpotlight((current) =>
+      current.filter((entry) =>
+        filteredCandidates.some((candidate) => candidate.user.id === entry.candidateId),
+      ),
+    );
+  }, [filteredCandidates]);
+
   const challengeView = useChallengeHub();
   const eventPartition = useMemo(
     () => premium.partitionEvents(challengeView.events),
-    [premium.partitionEvents, challengeView.events],
+    [challengeView.events, premium],
   );
 
   const nextCandidate = queueState.entries.find((entry, index) => {
@@ -511,8 +766,21 @@ export default function Home() {
         <OnboardingWizard profile={seekerProfile} assessment={seekerAssessment} />
       </section>
 
-      {notifications.length > 0 && (
+      {hasNotifications && (
         <div className={styles.notifications}>
+          {experienceHints.map((hint) => (
+            <div key={hint.id} className={styles.notification}>
+              <div>
+                <strong>{hint.title}</strong>
+                <span>{hint.description}</span>
+              </div>
+              {hint.action ? (
+                <button type="button" onClick={hint.action.onClick}>
+                  {hint.action.label}
+                </button>
+              ) : null}
+            </div>
+          ))}
           {notifications.map((notification) => (
             <div key={notification.id} className={styles.notification}>
               <div>
@@ -535,7 +803,7 @@ export default function Home() {
               premiumHighlight={premium.profileHighlight}
             />
           </section>
-          <section className={styles.matchSection}>
+          <section id="matches" className={styles.matchSection}>
             {premiumNotice ? (
               <div className={styles.premiumNotice}>
                 <span>{premiumNotice}</span>
@@ -591,7 +859,7 @@ export default function Home() {
             />
           </section>
 
-          <section className={styles.chatSection}>
+          <section id="chat" className={styles.chatSection}>
             <ChatInterface
               matches={mutualMatches}
               seeker={seekerParticipant}

@@ -6,6 +6,7 @@ import type {
   ChallengeInvitationMetadata,
   GiftMessageMetadata,
   PortfolioSnippetMetadata,
+  PhotoMessageMetadata,
   ReactionMetadata,
   VoiceMessageMetadata,
 } from "./types";
@@ -184,6 +185,7 @@ export interface VoiceNotePlanInput {
   vibe: VoiceMessageMetadata["vibe"];
   transcription?: string;
   waveform?: number[];
+  audioUrl?: string;
 }
 
 export interface PlannedVoiceMessage {
@@ -194,7 +196,7 @@ export interface PlannedVoiceMessage {
 export function planVoiceNote(input: VoiceNotePlanInput): PlannedVoiceMessage {
   const duration = Math.max(1, Math.round(input.durationSeconds));
   const waveform = (input.waveform ?? generateWaveform(duration)).slice(0, WAVEFORM_SAMPLE_LENGTH);
-  const playbackUrl = `https://voice.bonded.xyz/preview/${crypto.randomUUID()}.mp3`;
+  const playbackUrl = input.audioUrl ?? `https://voice.bonded.xyz/preview/${crypto.randomUUID()}.mp3`;
 
   const metadata: VoiceMessageMetadata = {
     type: "voice",
@@ -209,6 +211,38 @@ export function planVoiceNote(input: VoiceNotePlanInput): PlannedVoiceMessage {
   const summary = metadata.transcription
     ? `${summaryBase} — "${metadata.transcription.slice(0, 60)}"`
     : summaryBase;
+
+  return { summary, metadata };
+}
+
+export interface PhotoSharePlanInput {
+  fileName: string;
+  size: number;
+  previewUrl: string;
+  caption?: string;
+  width?: number;
+  height?: number;
+}
+
+export interface PlannedPhotoMessage {
+  summary: string;
+  metadata: PhotoMessageMetadata;
+}
+
+export function planPhotoShare(input: PhotoSharePlanInput): PlannedPhotoMessage {
+  const caption = input.caption?.trim();
+  const metadata: PhotoMessageMetadata = {
+    type: "photo",
+    previewUrl: input.previewUrl,
+    fileName: input.fileName,
+    size: input.size,
+    caption: caption && caption.length ? caption : undefined,
+    width: input.width,
+    height: input.height,
+  };
+
+  const summaryBase = "Shared a photo";
+  const summary = metadata.caption ? `${summaryBase} — "${metadata.caption.slice(0, 60)}"` : summaryBase;
 
   return { summary, metadata };
 }

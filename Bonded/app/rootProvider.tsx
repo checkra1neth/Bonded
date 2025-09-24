@@ -5,6 +5,7 @@ import { OnchainKitProvider } from "@coinbase/onchainkit";
 import "@coinbase/onchainkit/styles.css";
 
 import { AuthProvider } from "./providers/AuthProvider";
+import { MobileExperienceProvider } from "./providers/MobileExperienceProvider";
 
 export function RootProvider({ children }: { children: ReactNode }) {
   return (
@@ -26,7 +27,9 @@ export function RootProvider({ children }: { children: ReactNode }) {
         notificationProxyUrl: undefined,
       }}
     >
-      <AuthProvider>{children}</AuthProvider>
+      <MobileExperienceProvider>
+        <AuthProvider>{children}</AuthProvider>
+      </MobileExperienceProvider>
     </OnchainKitProvider>
   );
 }

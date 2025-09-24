@@ -1,0 +1,62 @@
+.container {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.card {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 420px;
+  padding: 2rem;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 12%, transparent);
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+  text-align: center;
+  box-shadow: 0 32px 80px rgba(10, 15, 40, 0.16);
+}
+
+.card h1 {
+  font-size: 1.9rem;
+  letter-spacing: -0.01em;
+}
+
+.card p {
+  font-size: 1rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  line-height: 1.6;
+}
+
+.actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.actions a,
+.actions button {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--foreground) 16%, transparent);
+  padding: 0.75rem 1.1rem;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.actions a:hover,
+.actions button:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--foreground) 30%, transparent);
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 1.5rem;
+  }
+
+  .card h1 {
+    font-size: 1.6rem;
+  }
+}
