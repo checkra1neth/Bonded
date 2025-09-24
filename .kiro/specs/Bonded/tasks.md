@@ -161,7 +161,7 @@
     - Write integration tests for premium user experience
     - _Requirements: 6.1, 6.6_
 
-- [ ] 10. Implement security and privacy features
+- [x] 10. Implement security and privacy features
   - [x] 10.1 Build comprehensive privacy controls
     - Implement end-to-end encryption for messages
     - Create granular privacy settings for portfolio information
@@ -171,7 +171,7 @@
     - Write security tests for privacy features
     - _Requirements: 7.1, 7.2, 7.3, 7.6_
 
-  - [ ] 10.2 Create moderation and safety features
+  - [x] 10.2 Create moderation and safety features
     - Build user reporting and moderation tools
     - Implement suspicious activity detection system
     - Create fraud prevention measures
