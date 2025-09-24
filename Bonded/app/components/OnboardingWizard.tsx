@@ -535,7 +535,7 @@ export function OnboardingWizard({ profile, assessment }: OnboardingWizardProps)
             "your best moments"}.
         </span>
         <span>
-          You\'re seeking {intentLabel.toLowerCase()} with {riskLabels || "your preferred risk vibes"} risk
+          You&apos;re seeking {intentLabel.toLowerCase()} with {riskLabels || "your preferred risk vibes"} risk
           alignment and love connecting through {communicationLabel.toLowerCase()}.
         </span>
         <span>Discovery focus: {eventLabels || "Tailor-made experiences"}.</span>

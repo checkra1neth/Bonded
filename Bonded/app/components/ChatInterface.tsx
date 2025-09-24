@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { ChangeEvent, FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, CSSProperties, FormEvent } from "react";
 
 import type { MutualMatch } from "@/lib/matching/queue";
 import type {
@@ -11,12 +11,14 @@ import type {
 import {
   planBasePayGift,
   planChallengeInvitation,
+  planPhotoShare,
   planPortfolioSnippet,
   planReaction,
   planVoiceNote,
   type BasePayGiftPlanInput,
   type ChallengePlanInput,
   type ChallengeTemplate,
+  type PhotoSharePlanInput,
   type ReactionPlanInput,
   type VoiceNotePlanInput,
 } from "@/lib/chat/advancedMessages";
@@ -28,6 +30,9 @@ import type {
   PortfolioVisibilityLevel,
 } from "@/lib/portfolio/privacy";
 
+import { notifyChatMessage } from "@/lib/mobile/notifications";
+
+import { useMobileExperience } from "../hooks/useMobileExperience";
 import { useChatSession } from "../hooks/useChatSession";
 import type { ChatMessageView } from "../hooks/useChatSession";
 import { useFollowUpNotes } from "../hooks/useFollowUpNotes";
@@ -44,7 +49,7 @@ interface ChatInterfaceProps {
   >;
 }
 
-type AdvancedAction = "gift" | "portfolio" | "challenge" | "voice";
+type AdvancedAction = "gift" | "portfolio" | "challenge" | "voice" | "camera";
 
 type PortfolioSharePreferences = {
   shareTokens: boolean;
@@ -109,6 +114,14 @@ export function ChatInterface({
   const [activeId, setActiveId] = useState<string | null>(matches[0]?.id ?? null);
   const [activeAction, setActiveAction] = useState<AdvancedAction | null>(null);
   const [reactionTargetId, setReactionTargetId] = useState<string | null>(null);
+  const { push, serviceWorker, isMobileViewport } = useMobileExperience();
+  const [keyboardInset, setKeyboardInset] = useState(0);
+  const messageListRef = useRef<HTMLDivElement | null>(null);
+  const lastRemoteMessageIdRef = useRef<string | null>(null);
+  const containerStyle = useMemo<CSSProperties>(
+    () => ({ "--keyboard-inset": `${keyboardInset}px` }),
+    [keyboardInset],
+  );
 
   const sortedMatches = useMemo(() => {
     return [...matches].sort((a, b) => b.createdAt - a.createdAt);
@@ -125,20 +138,94 @@ export function ChatInterface({
     ? candidatesById.get(activeMatch.candidateId)?.candidate ?? null
     : null;
 
-  const peer: ChatParticipant | undefined = peerCandidate
-    ? {
-        userId: peerCandidate.user.id,
-        displayName: peerCandidate.user.displayName,
-        avatarColor: peerCandidate.user.avatarColor,
-        role: "candidate",
-      }
-    : undefined;
+  const peer: ChatParticipant | undefined = useMemo(() => {
+    if (!peerCandidate) {
+      return undefined;
+    }
+    return {
+      userId: peerCandidate.user.id,
+      displayName: peerCandidate.user.displayName,
+      avatarColor: peerCandidate.user.avatarColor,
+      role: "candidate" as const,
+    } satisfies ChatParticipant;
+  }, [peerCandidate]);
 
   const { messages, typingUsers, status, sendMessage, notifyTyping } = useChatSession({
     conversationId: activeMatch?.id ?? null,
     participant: seeker,
     peer,
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !isMobileViewport) {
+      setKeyboardInset(0);
+      return;
+    }
+
+    const viewport = window.visualViewport;
+    if (!viewport) {
+      setKeyboardInset(0);
+      return;
+    }
+
+    const update = () => {
+      const offset = window.innerHeight - viewport.height - viewport.offsetTop;
+      setKeyboardInset(Math.max(0, Math.round(offset)));
+    };
+
+    update();
+
+    viewport.addEventListener("resize", update);
+    viewport.addEventListener("scroll", update);
+
+    return () => {
+      viewport.removeEventListener("resize", update);
+      viewport.removeEventListener("scroll", update);
+    };
+  }, [isMobileViewport]);
+
+  useEffect(() => {
+    const container = messageListRef.current;
+    if (!container) {
+      return;
+    }
+    container.scrollTop = container.scrollHeight;
+  }, [messages]);
+
+  useEffect(() => {
+    if (
+      !push.supported ||
+      push.permission !== "granted" ||
+      !serviceWorker.registration ||
+      !peer
+    ) {
+      return;
+    }
+
+    const remoteMessages = messages.filter((message) => !message.isLocal);
+    const latestRemote = remoteMessages.at(-1);
+    if (!latestRemote || latestRemote.id === lastRemoteMessageIdRef.current) {
+      return;
+    }
+
+    const shouldNotify =
+      typeof document === "undefined" || document.hidden || !document.hasFocus();
+
+    if (!shouldNotify) {
+      lastRemoteMessageIdRef.current = latestRemote.id;
+      return;
+    }
+
+    lastRemoteMessageIdRef.current = latestRemote.id;
+
+    notifyChatMessage(serviceWorker.registration, latestRemote, peer.displayName, {
+      conversationUrl: `/#chat?conversation=${encodeURIComponent(latestRemote.conversationId)}`,
+    }).catch(() => undefined);
+  }, [messages, peer, push.permission, push.supported, serviceWorker.registration]);
+
+  useEffect(() => {
+    lastRemoteMessageIdRef.current = null;
+  }, [activeMatch?.id]);
 
   const {
     records: noteRecords,
@@ -209,6 +296,15 @@ export function ChatInterface({
     [sendMessage],
   );
 
+  const handlePhotoSubmit = useCallback(
+    (input: PhotoSharePlanInput) => {
+      const plan = planPhotoShare(input);
+      sendMessage({ body: plan.summary, kind: "photo", metadata: plan.metadata });
+      setActiveAction(null);
+    },
+    [sendMessage],
+  );
+
   const handleReaction = useCallback(
     (planInput: ReactionPlanInput) => {
       const plan = planReaction(planInput);
@@ -228,7 +324,7 @@ export function ChatInterface({
   }
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} style={containerStyle}>
       <aside className={styles.sidebar}>
         <div className={styles.header}>
           <h3>Chat</h3>
@@ -318,6 +414,14 @@ export function ChatInterface({
           >
             Drop voice note
           </button>
+          <button
+            type="button"
+            className={`${styles.quickActionButton} ${activeAction === "camera" ? styles.quickActionButtonActive : ""}`}
+            onClick={() => setActiveAction(activeAction === "camera" ? null : "camera")}
+            disabled={!isReady}
+          >
+            Share a photo
+          </button>
         </div>
 
         {activeAction === "gift" ? (
@@ -342,8 +446,11 @@ export function ChatInterface({
         {activeAction === "voice" ? (
           <VoiceComposer isReady={isReady} onSubmit={handleVoiceSubmit} onCancel={() => setActiveAction(null)} />
         ) : null}
+        {activeAction === "camera" ? (
+          <CameraComposer isReady={isReady} onSubmit={handlePhotoSubmit} onCancel={() => setActiveAction(null)} />
+        ) : null}
 
-        <div className={styles.messageList}>
+        <div className={styles.messageList} ref={messageListRef}>
           {!nonReactionMessages.length ? (
             <div className={styles.emptyConversation}>
               <p>Break the ice with an on-chain themed opener.</p>
@@ -384,6 +491,7 @@ export function ChatInterface({
                               }
                               role="option"
                               aria-label={`React with ${emoji}`}
+                              aria-selected="false"
                             >
                               {emoji}
                             </button>
@@ -450,6 +558,9 @@ function renderMessageContent(message: ChatMessageView) {
   }
   if (message.kind === "voice" && metadata?.type === "voice") {
     return <VoiceMessage metadata={metadata} body={message.body} />;
+  }
+  if (message.kind === "photo" && metadata?.type === "photo") {
+    return <PhotoMessage metadata={metadata} body={message.body} />;
   }
 
   return <p>{message.body}</p>;
@@ -602,10 +713,47 @@ function VoiceMessage({ metadata, body }: VoiceMessageProps) {
         <span>{metadata.durationSeconds}s • {metadata.vibe} vibe</span>
         {metadata.transcription ? <span>“{metadata.transcription}”</span> : null}
       </div>
+      {metadata.playbackUrl ? (
+        <audio className={styles.voiceAudio} controls src={metadata.playbackUrl}>
+          Your device does not support inline audio playback.
+        </audio>
+      ) : null}
       <div className={styles.waveform} aria-hidden>
         {metadata.waveform.map((value, index) => (
           <span key={index} className={styles.waveformBar} style={{ height: `${Math.max(18, value * 48)}px` }} />
         ))}
+      </div>
+    </div>
+  );
+}
+
+interface PhotoMessageProps {
+  metadata: ReturnType<typeof planPhotoShare>["metadata"];
+  body: string;
+}
+
+function PhotoMessage({ metadata, body }: PhotoMessageProps) {
+  const sizeLabel =
+    metadata.size > 1024 ? `${(metadata.size / 1024).toFixed(1)} KB` : `${metadata.size} B`;
+
+  return (
+    <div className={styles.photoCard}>
+      <div className={styles.photoImageWrapper}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={metadata.previewUrl}
+          alt={metadata.caption ?? body}
+          className={styles.photoImage}
+          width={metadata.width}
+          height={metadata.height}
+        />
+      </div>
+      <div className={styles.photoMeta}>
+        <strong>{body}</strong>
+        <span>
+          {metadata.fileName} • {sizeLabel}
+        </span>
+        {metadata.caption ? <p>{metadata.caption}</p> : null}
       </div>
     </div>
   );
@@ -883,13 +1031,110 @@ function VoiceComposer({ isReady, onSubmit, onCancel }: VoiceComposerProps) {
   const [duration, setDuration] = useState<number>(18);
   const [vibe, setVibe] = useState<VoiceNotePlanInput["vibe"]>("chill");
   const [transcription, setTranscription] = useState<string>("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioPreview, setAudioPreview] = useState<string | null>(null);
+  const [recordedDuration, setRecordedDuration] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const recordStartedAtRef = useRef<number>(0);
+  const chunksRef = useRef<Blob[]>([]);
+
+  const cleanupStream = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
+  const resetRecording = useCallback(() => {
+    cleanupStream();
+    mediaRecorderRef.current = null;
+    chunksRef.current = [];
+    setAudioPreview(null);
+    setRecordedDuration(null);
+    setIsRecording(false);
+  }, [cleanupStream]);
+
+  const handleStartRecording = useCallback(async () => {
+    if (isRecording) {
+      return;
+    }
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+      setError("Recording not supported on this device.");
+      return;
+    }
+    setError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      cleanupStream();
+      streamRef.current = stream;
+      const recorder = new MediaRecorder(stream);
+      chunksRef.current = [];
+      recorder.addEventListener("dataavailable", (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      });
+      recorder.addEventListener("stop", () => {
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        cleanupStream();
+        const reader = new FileReader();
+        reader.onload = () => {
+          setAudioPreview(typeof reader.result === "string" ? reader.result : null);
+        };
+        reader.readAsDataURL(blob);
+        const elapsedMs = typeof performance !== "undefined" ? performance.now() - recordStartedAtRef.current : 0;
+        const seconds = Math.max(1, Math.round(elapsedMs / 1000));
+        setRecordedDuration(seconds);
+        setDuration(seconds);
+        mediaRecorderRef.current = null;
+        setIsRecording(false);
+      });
+      recordStartedAtRef.current = typeof performance !== "undefined" ? performance.now() : Date.now();
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+    } catch {
+      cleanupStream();
+      setError("Unable to access microphone. Please check permissions.");
+    }
+  }, [cleanupStream, isRecording]);
+
+  const handleStopRecording = useCallback(() => {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder) {
+      return;
+    }
+    if (recorder.state !== "inactive") {
+      recorder.stop();
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      const recorder = mediaRecorderRef.current;
+      if (recorder && recorder.state !== "inactive") {
+        recorder.stop();
+      }
+      cleanupStream();
+    };
+  }, [cleanupStream]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isReady) {
+    if (!isReady || isRecording) {
       return;
     }
-    onSubmit({ durationSeconds: duration, vibe, transcription });
+    onSubmit({
+      durationSeconds: recordedDuration ?? duration,
+      vibe,
+      transcription,
+      audioUrl: audioPreview ?? undefined,
+    });
+    resetRecording();
+    setTranscription("");
   };
 
   return (
@@ -897,6 +1142,27 @@ function VoiceComposer({ isReady, onSubmit, onCancel }: VoiceComposerProps) {
       <div className={styles.actionHeader}>
         <strong>Drop a voice note</strong>
         <p>Perfect for mobile — let your tone set the vibe.</p>
+      </div>
+      <div className={styles.voiceRecorder}>
+        <button
+          type="button"
+          className={styles.voiceRecorderButton}
+          onClick={isRecording ? handleStopRecording : handleStartRecording}
+        >
+          {isRecording ? "Stop recording" : audioPreview ? "Re-record" : "Record voice note"}
+        </button>
+        {isRecording ? <span className={styles.recordingBadge}>Recording…</span> : null}
+        {audioPreview ? (
+          <audio className={styles.voicePreview} controls src={audioPreview}>
+            Preview unavailable on this device.
+          </audio>
+        ) : null}
+        {audioPreview ? (
+          <button type="button" className={styles.resetRecording} onClick={resetRecording}>
+            Remove recording
+          </button>
+        ) : null}
+        {error ? <p className={styles.errorText}>{error}</p> : null}
       </div>
       <label className={styles.fullWidthField}>
         Mood
@@ -908,14 +1174,15 @@ function VoiceComposer({ isReady, onSubmit, onCancel }: VoiceComposerProps) {
         </select>
       </label>
       <label className={styles.fullWidthField}>
-        Length: {duration}s
+        Length: {(recordedDuration ?? duration)}s
         <input
           type="range"
           min={6}
           max={60}
           step={1}
-          value={duration}
+          value={recordedDuration ?? duration}
           onChange={(event) => setDuration(Number(event.target.value))}
+          disabled={Boolean(recordedDuration)}
         />
       </label>
       <label className={styles.fullWidthField}>
@@ -928,11 +1195,150 @@ function VoiceComposer({ isReady, onSubmit, onCancel }: VoiceComposerProps) {
         />
       </label>
       <div className={styles.actionButtons}>
-        <button type="button" onClick={onCancel}>
+        <button type="button" onClick={() => {
+          resetRecording();
+          onCancel();
+        }}>
           Cancel
         </button>
-        <button type="submit" disabled={!isReady}>
+        <button type="submit" disabled={!isReady || isRecording}>
           Share voice note
+        </button>
+      </div>
+    </form>
+  );
+}
+
+interface CameraComposerProps {
+  isReady: boolean;
+  onSubmit: (input: PhotoSharePlanInput) => void;
+  onCancel: () => void;
+}
+
+function CameraComposer({ isReady, onSubmit, onCancel }: CameraComposerProps) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [caption, setCaption] = useState<string>("");
+  const [metadata, setMetadata] = useState<{ name: string; size: number; width?: number; height?: number } | null>(null);
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    if (!file) {
+      setPreviewUrl(null);
+      setMetadata(null);
+      return;
+    }
+
+    setProcessing(true);
+    setError(null);
+    setMetadata({ name: file.name, size: file.size });
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : null;
+      setPreviewUrl(result);
+      setProcessing(false);
+      if (result) {
+        const image = new Image();
+        image.onload = () => {
+          setMetadata({ name: file.name, size: file.size, width: image.width, height: image.height });
+        };
+        image.src = result;
+      }
+    };
+    reader.onerror = () => {
+      setProcessing(false);
+      setError("Unable to load photo preview.");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!isReady || !previewUrl || !metadata) {
+      setError("Capture a photo before sharing.");
+      return;
+    }
+    onSubmit({
+      fileName: metadata.name,
+      size: metadata.size,
+      previewUrl,
+      caption,
+      width: metadata.width,
+      height: metadata.height,
+    });
+    setCaption("");
+    setPreviewUrl(null);
+    setMetadata(null);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  };
+
+  const handleReset = () => {
+    setPreviewUrl(null);
+    setMetadata(null);
+    setError(null);
+    setCaption("");
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <form className={styles.actionPanel} onSubmit={handleSubmit}>
+      <div className={styles.actionHeader}>
+        <strong>Share a fresh photo</strong>
+        <p>Instantly capture Base chemistry with your camera roll.</p>
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className={styles.hiddenFileInput}
+        onChange={handleFileChange}
+      />
+      <div className={styles.cameraActions}>
+        <button type="button" onClick={() => inputRef.current?.click()} disabled={!isReady || processing}>
+          {previewUrl ? "Retake photo" : "Open camera"}
+        </button>
+        {previewUrl ? (
+          <button type="button" className={styles.resetRecording} onClick={handleReset}>
+            Remove photo
+          </button>
+        ) : null}
+      </div>
+      {processing ? <p className={styles.cameraStatus}>Processing photo…</p> : null}
+      {previewUrl ? (
+        <div className={styles.cameraPreview}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={previewUrl} alt="Photo preview" />
+        </div>
+      ) : (
+        <p className={styles.cameraPlaceholder}>Ready when you are — mobile cameras shine here.</p>
+      )}
+      <label className={styles.fullWidthField}>
+        Caption
+        <input
+          type="text"
+          value={caption}
+          onChange={(event) => setCaption(event.target.value)}
+          placeholder="Set the context for your shot"
+        />
+      </label>
+      {error ? <p className={styles.errorText}>{error}</p> : null}
+      <div className={styles.actionButtons}>
+        <button type="button" onClick={() => {
+          handleReset();
+          onCancel();
+        }}>
+          Cancel
+        </button>
+        <button type="submit" disabled={!isReady || processing || !previewUrl}>
+          Share photo
         </button>
       </div>
     </form>

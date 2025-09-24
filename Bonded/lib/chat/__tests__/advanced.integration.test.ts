@@ -4,6 +4,7 @@ import {
   planBasePayGift,
   planPortfolioSnippet,
   planReaction,
+  planPhotoShare,
   planVoiceNote,
 } from "../advancedMessages";
 import { extractReactions } from "../reactions";
@@ -79,6 +80,20 @@ describe("advanced chat message planning", () => {
     expect(plan.metadata.waveform.length).toBeGreaterThan(0);
     expect(plan.metadata.transcription).toBe("gm fam");
     expect(plan.summary).toContain("voice note");
+  });
+
+  it("summarizes shared photos with captions", () => {
+    const plan = planPhotoShare({
+      fileName: "date-night.png",
+      size: 245678,
+      previewUrl: "data:image/png;base64,hello",
+      caption: "Base mainnet vibes",
+      width: 800,
+      height: 600,
+    });
+    expect(plan.metadata.type).toBe("photo");
+    expect(plan.metadata.caption).toBe("Base mainnet vibes");
+    expect(plan.summary).toContain("Shared a photo");
   });
 });
 

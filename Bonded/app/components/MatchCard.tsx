@@ -1,8 +1,16 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+} from "react";
 
 import styles from "./MatchCard.module.css";
 import type { MatchCandidate, MatchDecision } from "@/lib/matching/compatibility";
 import { PersonalityHighlight } from "./PersonalityHighlight";
+import { useMobileExperience } from "../hooks/useMobileExperience";
 
 interface MatchCardProps {
   candidate: MatchCandidate;
@@ -51,11 +59,42 @@ export function MatchCard({ candidate, isActive = false, onDecision }: MatchCard
 
   const score = Math.round(candidate.compatibilityScore.overall * 100);
 
+  const { connection, miniKit } = useMobileExperience();
+  const miniKitReady = miniKit.ready;
+  const miniKitHaptics = miniKit.haptics;
+  const saveData = connection?.saveData ?? false;
+  const slowNetwork = connection?.effectiveType
+    ? /(2g|slow-2g)/i.test(connection.effectiveType)
+    : false;
+  const factorLimit = saveData ? 2 : slowNetwork ? 3 : candidate.compatibilityScore.factors.length;
+  const reasoningLimit = saveData
+    ? 3
+    : slowNetwork
+      ? 4
+      : candidate.compatibilityScore.reasoning.length;
+  const icebreakerLimit = saveData ? 2 : slowNetwork ? 3 : candidate.icebreakers.length;
+
   const [drag, setDrag] = useState<DragState>(initialDragState);
   const [intent, setIntent] = useState<MatchDecision | null>(null);
   const [outcome, setOutcome] = useState<MatchDecision | null>(null);
   const timeoutRef = useRef<number | null>(null);
   const pointerIdRef = useRef<number | null>(null);
+  const intentHapticRef = useRef<MatchDecision | null>(null);
+
+  const factors = useMemo(
+    () => candidate.compatibilityScore.factors.slice(0, Math.max(1, factorLimit)),
+    [candidate.compatibilityScore.factors, factorLimit],
+  );
+
+  const reasoning = useMemo(
+    () => candidate.compatibilityScore.reasoning.slice(0, Math.max(1, reasoningLimit)),
+    [candidate.compatibilityScore.reasoning, reasoningLimit],
+  );
+
+  const icebreakers = useMemo(
+    () => candidate.icebreakers.slice(0, Math.max(1, icebreakerLimit)),
+    [candidate.icebreakers, icebreakerLimit],
+  );
 
   useEffect(() => {
     return () => {
@@ -107,6 +146,11 @@ export function MatchCard({ candidate, isActive = false, onDecision }: MatchCard
       window.clearTimeout(timeoutRef.current);
     }
 
+    if (miniKitReady && miniKitHaptics?.impactOccurred) {
+      const style = decision === "super" ? "heavy" : decision === "pass" ? "light" : "medium";
+      miniKitHaptics.impactOccurred(style);
+    }
+
     setIntent(decision);
     setOutcome(decision);
     setDrag({
@@ -125,6 +169,7 @@ export function MatchCard({ candidate, isActive = false, onDecision }: MatchCard
   const resetDrag = () => {
     setDrag(() => ({ ...initialDragState }));
     setIntent(null);
+    intentHapticRef.current = null;
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLElement>) => {
@@ -141,6 +186,10 @@ export function MatchCard({ candidate, isActive = false, onDecision }: MatchCard
       x: 0,
       y: 0,
     });
+
+    if (miniKitReady && miniKitHaptics?.impactOccurred) {
+      miniKitHaptics.impactOccurred("light");
+    }
   };
 
   const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
@@ -191,6 +240,33 @@ export function MatchCard({ candidate, isActive = false, onDecision }: MatchCard
   const handleButtonDecision = (decision: MatchDecision) => {
     triggerDecision(decision);
   };
+
+  useEffect(() => {
+    if (!miniKitReady || !miniKitHaptics?.selectionChanged) {
+      return;
+    }
+
+    if (!intent) {
+      intentHapticRef.current = null;
+      return;
+    }
+
+    if (intentHapticRef.current === intent) {
+      return;
+    }
+
+    miniKitHaptics.selectionChanged();
+    intentHapticRef.current = intent;
+  }, [intent, miniKitHaptics, miniKitReady]);
+
+  useEffect(() => {
+    if (!miniKitReady || !miniKitHaptics?.notificationOccurred || !outcome) {
+      return;
+    }
+
+    const tone = outcome === "pass" ? "warning" : "success";
+    miniKitHaptics.notificationOccurred(tone);
+  }, [miniKitHaptics, miniKitReady, outcome]);
 
   const baseScale = isActive ? 1.01 : 1;
   const translateY = drag.y + (isActive ? -6 : 0);
@@ -245,7 +321,7 @@ export function MatchCard({ candidate, isActive = false, onDecision }: MatchCard
       </div>
 
       <section className={styles.factors} aria-label="Compatibility breakdown">
-        {candidate.compatibilityScore.factors.map((factor) => (
+        {factors.map((factor) => (
           <div key={factor.id} className={styles.factor}>
             <div className={styles.factorHeader}>
               <span>{factor.label}</span>
@@ -265,7 +341,7 @@ export function MatchCard({ candidate, isActive = false, onDecision }: MatchCard
       <section className={styles.detailSection} aria-label="Why this match works">
         <h4>Shared signals</h4>
         <ul>
-          {candidate.compatibilityScore.reasoning.map((reason) => (
+          {reasoning.map((reason) => (
             <li key={reason}>{reason}</li>
           ))}
         </ul>
@@ -274,7 +350,7 @@ export function MatchCard({ candidate, isActive = false, onDecision }: MatchCard
       <section className={styles.detailSection} aria-label="Conversation starters">
         <h4>Conversation starters</h4>
         <ul>
-          {candidate.icebreakers.map((prompt) => (
+          {icebreakers.map((prompt) => (
             <li key={prompt}>{prompt}</li>
           ))}
         </ul>

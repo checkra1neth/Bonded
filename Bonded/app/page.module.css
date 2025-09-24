@@ -493,3 +493,73 @@
     min-height: auto;
   }
 }
+
+@media (max-width: 720px) {
+  .page {
+    gap: 2.25rem;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .ctaRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .heroStats {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .notifications {
+    margin: 0 0 1.5rem;
+  }
+
+  .notification {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .notification button {
+    width: 100%;
+  }
+
+  .premiumNotice,
+  .undoRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .panel {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 540px) {
+  .page {
+    padding: 1.25rem 0.75rem 3rem;
+  }
+
+  .heroStats {
+    grid-template-columns: 1fr;
+  }
+
+  .ctaRow {
+    gap: 1rem;
+  }
+
+  .progressCard {
+    padding: 1.5rem;
+  }
+
+  .deck {
+    width: 100%;
+    min-height: 480px;
+  }
+
+  .panel {
+    gap: 0.85rem;
+  }
+}

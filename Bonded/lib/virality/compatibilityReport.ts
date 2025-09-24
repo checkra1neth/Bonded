@@ -590,7 +590,7 @@ function composeShareCopy(input: ComposeCopyInput): string {
   const partnerSegment = partner ? ` with ${partner}` : "";
   const base = `${owner} just hit a ${percent}% ${categoryLabel} match${partnerSegment} on Bonded.`;
   const cta = PLATFORM_CTA[platform];
-  let message = `${base} ${snippet} ${cta} ${referralUrl}`;
+  const message = `${base} ${snippet} ${cta} ${referralUrl}`;
 
   if (message.length <= limit) {
     return message;

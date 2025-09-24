@@ -290,6 +290,27 @@
   }
 }
 
+@media (pointer: coarse) {
+  .card {
+    padding: 1.35rem;
+    gap: 1.25rem;
+  }
+
+  .actions {
+    grid-template-columns: 1fr;
+  }
+
+  .actionButton {
+    font-size: 1.05rem;
+    padding: 1rem;
+  }
+
+  .swipeOverlay span {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.9rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card {
     transition: none;

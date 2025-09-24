@@ -13,6 +13,7 @@ export type ChatMessageKind =
   | "portfolio_snippet"
   | "challenge"
   | "voice"
+  | "photo"
   | "reaction";
 
 export interface GiftMessageMetadata {
@@ -68,6 +69,16 @@ export interface VoiceMessageMetadata {
   transcription?: string;
 }
 
+export interface PhotoMessageMetadata {
+  type: "photo";
+  previewUrl: string;
+  fileName: string;
+  size: number;
+  width?: number;
+  height?: number;
+  caption?: string;
+}
+
 export interface ReactionMetadata {
   type: "reaction";
   emoji: string;
@@ -79,6 +90,7 @@ export type ChatMessageMetadata =
   | PortfolioSnippetMetadata
   | ChallengeInvitationMetadata
   | VoiceMessageMetadata
+  | PhotoMessageMetadata
   | ReactionMetadata;
 
 export interface ChatParticipant {
