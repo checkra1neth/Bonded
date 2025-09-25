@@ -90,9 +90,9 @@ describe("ErrorHandlingProvider", () => {
   });
 
   it("shows fallback UI when a child throws", async () => {
-    function Boom() {
+    const Boom: React.FC = () => {
       throw new Error("explode");
-    }
+    };
 
     const consoleErrorSpy = vi
       .spyOn(console, "error")

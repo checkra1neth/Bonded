@@ -27,8 +27,24 @@ export interface PremiumFilterSummary {
   activeFilters: string[];
 }
 
-const normalizeList = (values: string[] | undefined): string[] =>
+const COMPATIBILITY_CATEGORY_IDS = [
+  "crypto_soulmates",
+  "defi_compatible",
+  "potential_match",
+  "different_strategies",
+] as const satisfies readonly CompatibilityCategoryId[];
+
+const COMPATIBILITY_CATEGORY_SET = new Set<CompatibilityCategoryId>(COMPATIBILITY_CATEGORY_IDS);
+
+const normalizeList = (values: readonly string[] | undefined): string[] =>
   Array.from(new Set((values ?? []).map((value) => value.trim()).filter(Boolean)));
+
+const normalizeCategories = (
+  values: PremiumFilterOptions["categories"],
+): CompatibilityCategoryId[] =>
+  normalizeList(values).filter((value): value is CompatibilityCategoryId =>
+    COMPATIBILITY_CATEGORY_SET.has(value as CompatibilityCategoryId),
+  );
 
 const normalizeScore = (value: number | undefined): number => {
   if (typeof value !== "number" || Number.isNaN(value)) {
@@ -41,10 +57,10 @@ export function normalizeFilterOptions(options: PremiumFilterOptions): Required<
   return {
     searchTerm: options.searchTerm?.trim() ?? "",
     minScore: normalizeScore(options.minScore),
-    categories: normalizeList(options.categories),
+    categories: normalizeCategories(options.categories),
     tokenSymbols: normalizeList(options.tokenSymbols).map((symbol) => symbol.toUpperCase()),
     defiProtocols: normalizeList(options.defiProtocols).map((protocol) => protocol.toLowerCase()),
-    activityFocus: normalizeList(options.activityFocus as string[]).filter(
+    activityFocus: normalizeList(options.activityFocus).filter(
       (value): value is ActivityFilter => value === "active_hours" || value === "risk_alignment",
     ),
     personalities: normalizeList(options.personalities),

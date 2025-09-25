@@ -38,6 +38,7 @@ const snapshot: SanitizedPortfolioSnapshot = {
     "Grew treasury to seven figures",
     "Ran onchain couples retreat",
   ],
+  transactions: null,
 };
 
 const history: RelationshipHistory = {

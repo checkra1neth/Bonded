@@ -130,7 +130,9 @@ describe("PortfolioAnalyzer", () => {
     expect(snapshot.activity.activeHours).toEqual([18, 19, 20]);
     expect(snapshot.activity.timezoneOffset).toBe(-3);
 
-    expect(snapshot.highlights.length).toBeGreaterThan(0);
-    expect(snapshot.highlights[0]).toContain("Token focus");
+    const highlights = snapshot.highlights ?? [];
+    expect(highlights.length).toBeGreaterThan(0);
+    const [firstHighlight = ""] = highlights;
+    expect(firstHighlight).toContain("Token focus");
   });
 });

@@ -436,8 +436,9 @@ export class PortfolioAnalyzer {
       }
       seen.add(fingerprint);
 
-      const protocolDefinition =
-        counterpartyAddress && ADDRESS_PROTOCOL_MAP.get(counterpartyAddress.toLowerCase());
+      const protocolDefinition = counterpartyAddress
+        ? ADDRESS_PROTOCOL_MAP.get(counterpartyAddress.toLowerCase())
+        : undefined;
 
       let counterpartyType: NonNullable<PortfolioTransaction["counterpartyType"]> = "unknown";
       if (direction === "self") {

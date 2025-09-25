@@ -1,5 +1,3 @@
-"use server";
-
 import { logger } from "./logger";
 import { getServerEnv } from "../config/env";
 
@@ -76,16 +74,17 @@ class TelemetryClient {
       return;
     }
 
-    const contextSummary = error.context && Object.keys(error.context).length > 0
-      ? JSON.stringify(error.context, null, 2).slice(0, 1900)
-      : null;
+    const contextSummary =
+      error.context && Object.keys(error.context).length > 0
+        ? JSON.stringify(error.context, null, 2).slice(0, 1900)
+        : null;
 
     const contextBlock = contextSummary
       ? {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "*Context*\\n\\n```\\n" + contextSummary + "\\n```",
+            text: "*Context*\n\n```\n" + contextSummary + "\n```",
           },
         }
       : null;
@@ -95,7 +94,7 @@ class TelemetryClient {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "\\n\\n```\\n" + error.stack.slice(0, 1500) + "\\n```",
+            text: "\n\n```\n" + error.stack.slice(0, 1500) + "\n```",
           },
         }
       : null;

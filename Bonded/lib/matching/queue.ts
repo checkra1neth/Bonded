@@ -158,9 +158,9 @@ export function matchQueueReducer(
         createdAt: timestamp,
       };
 
-      const entries = state.entries.map((existing, index) =>
+      const entries = state.entries.map((existing, index): MatchQueueEntry =>
         index === entryIndex
-          ? { candidate: existing.candidate, status: "decided", decision: decisionRecord }
+          ? { candidate: existing.candidate, status: "decided" as const, decision: decisionRecord }
           : existing,
       );
 

@@ -73,50 +73,55 @@ export function ProfileEditor({
       </div>
 
       <div className={styles.fieldGrid}>
-        <label>
+        <label className={styles.fieldLabel}>
           <span>Display name</span>
           <input
             type="text"
             value={profile.displayName}
             onChange={(event) => onProfileChange("displayName", event.target.value)}
+            className={styles.fieldControl}
           />
         </label>
-        <label>
+        <label className={styles.fieldLabel}>
           <span>Basename</span>
           <input
             type="text"
             value={profile.basename}
             placeholder="ava.base"
             onChange={(event) => onProfileChange("basename", event.target.value)}
+            className={styles.fieldControl}
           />
         </label>
-        <label>
+        <label className={styles.fieldLabel}>
           <span>Location</span>
           <input
             type="text"
             value={profile.location}
             placeholder="New York • EST"
             onChange={(event) => onProfileChange("location", event.target.value)}
+            className={styles.fieldControl}
           />
         </label>
       </div>
 
-      <label className={styles.fullWidth}>
+      <label className={`${styles.fullWidth} ${styles.fieldLabel}`}>
         <span>Headline</span>
         <input
           type="text"
           value={profile.headline}
           placeholder="Base energy seeking aligned co-pilot"
           onChange={(event) => onProfileChange("headline", event.target.value)}
+          className={styles.fieldControl}
         />
       </label>
 
-      <label className={styles.fullWidth}>
+      <label className={`${styles.fullWidth} ${styles.fieldLabel}`}>
         <span>Bio</span>
         <textarea
           value={profile.bio}
           placeholder="Share how you blend on-chain moves with real-world energy."
           onChange={(event) => onProfileChange("bio", event.target.value)}
+          className={`${styles.fieldControl} ${styles.fieldTextarea}`}
         />
       </label>
 
@@ -146,6 +151,7 @@ export function ProfileEditor({
             placeholder="Add a highlight (e.g. Base OG)"
             onChange={(event) => setAchievementDraft(event.target.value)}
             onKeyDown={handleAchievementKeyDown}
+            className={styles.fieldControl}
           />
           <button type="button" onClick={handleAchievementSubmit} disabled={!achievementDraft.trim()}>
             Add highlight
@@ -160,7 +166,7 @@ export function ProfileEditor({
         <ul className={styles.verificationList}>
           {verifications.map((verification) => (
             <li key={verification.id} className={styles.verificationItem}>
-              <label htmlFor={`verification-${verification.id}`}>
+              <label htmlFor={`verification-${verification.id}`} className={styles.fieldLabel}>
                 <span>{verification.label}</span>
                 {verification.detail ? <p>{verification.detail}</p> : null}
               </label>
@@ -170,6 +176,7 @@ export function ProfileEditor({
                 onChange={(event) =>
                   onVerificationChange(verification.id, event.target.value as ProfileVerificationStatus)
                 }
+                className={styles.fieldControl}
               >
                 <option value="verified">Verified</option>
                 <option value="pending">Pending</option>

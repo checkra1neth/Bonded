@@ -1,6 +1,18 @@
 import type { MatchNotification } from "@/lib/matching/queue";
 import type { ChatMessage, ChatMessageKind } from "@/lib/chat/types";
 
+interface WebNotificationAction {
+  action: string;
+  title: string;
+  icon?: string;
+}
+
+type ExtendedNotificationOptions = NotificationOptions & {
+  vibrate?: number[];
+  actions?: WebNotificationAction[];
+  renotify?: boolean;
+};
+
 type NotificationPayload = {
   title: string;
   body: string;
@@ -9,7 +21,7 @@ type NotificationPayload = {
   badge?: string;
   icon?: string;
   vibrate?: number[];
-  actions?: NotificationAction[];
+  actions?: WebNotificationAction[];
 };
 
 const DEFAULT_BADGE = "/icon.png";
@@ -19,7 +31,7 @@ export async function showLocalNotification(
   registration: ServiceWorkerRegistration,
   payload: NotificationPayload,
 ): Promise<void> {
-  const options: NotificationOptions = {
+  const options: ExtendedNotificationOptions = {
     body: payload.body,
     tag: payload.tag,
     data: {

@@ -153,7 +153,7 @@ describe("buildMatchCandidate", () => {
       user: {
         id: "user-3",
         displayName: "Nova",
-        personality: "Yield Farmer",
+        personality: "DeFi Degen",
       },
     });
 

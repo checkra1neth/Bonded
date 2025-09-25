@@ -1,4 +1,5 @@
 import { getAddress, isAddress, verifyMessage } from "viem";
+import type { Hex } from "viem";
 import { InvalidAddressError, SignatureVerificationError } from "./errors";
 
 export type SignatureVerificationInput = {
@@ -18,7 +19,7 @@ export async function verifyWalletSignature({ address, message, signature }: Sig
     const verified = await verifyMessage({
       address: checksumAddress,
       message,
-      signature,
+      signature: signature as Hex,
     });
 
     if (!verified) {

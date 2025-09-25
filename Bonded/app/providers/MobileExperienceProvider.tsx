@@ -84,12 +84,13 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
 
-type MutableConnection = Connection & {
+type MutableConnection = {
+  effectiveType?: string;
+  saveData?: boolean;
+  downlink?: number;
   addEventListener?: (type: string, listener: () => void) => void;
   removeEventListener?: (type: string, listener: () => void) => void;
 };
-
-type Connection = Navigator["connection"];
 type NavigatorWithStandalone = Navigator & { standalone?: boolean };
 
 const noop = () => {
@@ -155,6 +156,7 @@ function getNavigatorConnection(): MutableConnection | null {
   }
 
   const nav = navigator as Navigator & {
+    connection?: MutableConnection;
     mozConnection?: MutableConnection;
     webkitConnection?: MutableConnection;
   };
@@ -424,14 +426,14 @@ export function MobileExperienceProvider({
       }
 
       try {
-        const available = await miniAppSdk.isInMiniApp?.(750);
+        const available = await miniAppSdk.isInMiniApp?.();
         if (!available || cancelled) {
           return;
         }
 
         const [capabilities] = await Promise.all([
           miniAppSdk.getCapabilities?.().catch(() => []),
-          miniAppSdk.actions.ready?.({ displayMode: "fullscreen" }).catch(() => undefined),
+          miniAppSdk.actions.ready?.().catch(() => undefined),
         ]);
 
         if (cancelled) {

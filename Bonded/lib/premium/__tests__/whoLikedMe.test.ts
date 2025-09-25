@@ -5,12 +5,34 @@ import type { MatchQueueEntry } from "../../matching/queue";
 import { resolvePlan } from "../plans";
 import { generateWhoLikedMe } from "../whoLikedMe";
 
+const buildPersonality = (
+  type: MatchCandidate["personality"]["type"],
+): MatchCandidate["personality"] => ({
+  type,
+  confidence: 0.82,
+  summary: "",
+  headline: "",
+  scores: [],
+  strengths: [],
+  growthAreas: [],
+});
+
 function buildCandidate(id: string, options: Partial<MatchCandidate> = {}): MatchCandidate {
+  const personalityType = options.personality?.type ?? options.user?.personality ?? "Banker";
+  const defaultCategory: MatchCandidate["compatibilityScore"]["category"] = {
+    id: "defi_compatible",
+    label: "",
+    description: "",
+    minScore: 0,
+    highlight: "",
+  };
+  const category = options.compatibilityScore?.category ?? defaultCategory;
+
   return {
     user: {
       id,
       displayName: options.user?.displayName ?? id,
-      personality: options.user?.personality ?? "Onchain Strategist",
+      personality: personalityType,
       basename: options.user?.basename,
     },
     compatibilityScore: {
@@ -19,16 +41,13 @@ function buildCandidate(id: string, options: Partial<MatchCandidate> = {}): Matc
       defiCompatibility: options.compatibilityScore?.defiCompatibility ?? 0.84,
       nftAlignment: options.compatibilityScore?.nftAlignment ?? 0.7,
       activitySync: options.compatibilityScore?.activitySync ?? 0.76,
-      category:
-        options.compatibilityScore?.category ??
-        ({ id: "defi_compatible", label: "", description: "", minScore: 0, highlight: "" } as MatchCandidate["compatibilityScore"]["category"]),
+      category,
       reasoning: options.compatibilityScore?.reasoning ?? ["Mirrors your staking cadence"],
       factors: options.compatibilityScore?.factors ?? [],
     },
     sharedInterests: options.sharedInterests ?? [],
     icebreakers: options.icebreakers ?? [],
-    personality:
-      options.personality ?? ({ type: "Onchain Strategist", summary: "", highlights: [] } as MatchCandidate["personality"]),
+    personality: options.personality ?? buildPersonality(personalityType),
     interaction: options.interaction,
   };
 }

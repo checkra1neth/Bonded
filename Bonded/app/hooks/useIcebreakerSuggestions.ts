@@ -48,7 +48,7 @@ export function useIcebreakerSuggestions({
   seekerPersonality,
   candidatesById,
 }: UseIcebreakerSuggestionsOptions): UseIcebreakerSuggestionsResult {
-  const generatorRef = useRef<IcebreakerGenerator>();
+  const generatorRef = useRef<IcebreakerGenerator | null>(null);
   if (!generatorRef.current) {
     generatorRef.current = new IcebreakerGenerator();
   }

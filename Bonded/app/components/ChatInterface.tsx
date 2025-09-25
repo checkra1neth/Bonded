@@ -119,7 +119,7 @@ export function ChatInterface({
   const messageListRef = useRef<HTMLDivElement | null>(null);
   const lastRemoteMessageIdRef = useRef<string | null>(null);
   const containerStyle = useMemo<CSSProperties>(
-    () => ({ "--keyboard-inset": `${keyboardInset}px` }),
+    () => ({ "--keyboard-inset": `${keyboardInset}px` }) as CSSProperties,
     [keyboardInset],
   );
 
