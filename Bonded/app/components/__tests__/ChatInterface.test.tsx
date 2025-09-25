@@ -45,7 +45,6 @@ vi.mock(
   async () => ({
     ...(await import("../../../lib/chat/advancedMessages")),
   }),
-  { virtual: true },
 );
 
 vi.mock(
@@ -53,7 +52,6 @@ vi.mock(
   async () => ({
     ...(await import("../../../lib/chat/reactions")),
   }),
-  { virtual: true },
 );
 
 vi.mock("@/lib/mobile/notifications", () => ({

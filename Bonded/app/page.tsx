@@ -131,7 +131,7 @@ const seekerProfile: CompatibilityProfile = {
   portfolio: seekerPortfolio,
 };
 
-const candidateSeeds: ReadonlyArray<CandidateSeed> = [
+const candidateSeeds: CandidateSeed[] = [
   {
     user: {
       id: "nova-yield",

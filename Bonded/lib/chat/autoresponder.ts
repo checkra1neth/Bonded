@@ -62,7 +62,7 @@ const QUESTION_RESPONSES = [
   "I love that topic. Want to riff on it over a Base Pay coffee?",
 ];
 
-const RANDOM_TYPING_WINDOW = [1200, 2100];
+const RANDOM_TYPING_WINDOW: [number, number] = [1200, 2100];
 
 function pickRandom<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];

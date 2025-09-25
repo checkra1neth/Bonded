@@ -6,12 +6,25 @@ import { resolvePlan } from "../plans";
 
 const PLAN = resolvePlan("premium_founder");
 
+const buildPersonality = (
+  type: MatchCandidate["personality"]["type"],
+): MatchCandidate["personality"] => ({
+  type,
+  confidence: 0.8,
+  summary: "",
+  headline: "",
+  scores: [],
+  strengths: [],
+  growthAreas: [],
+});
+
 function mockCandidate(overall: number, id: string, options: Partial<MatchCandidate> = {}): MatchCandidate {
-  const baseCandidate: MatchCandidate = {
+  const personalityType = options.personality?.type ?? options.user?.personality ?? "Banker";
+  return {
     user: {
       id,
-      displayName: id,
-      personality: options.personality?.type ?? "Onchain Strategist",
+      displayName: options.user?.displayName ?? id,
+      personality: personalityType,
     },
     compatibilityScore: {
       overall,
@@ -20,21 +33,20 @@ function mockCandidate(overall: number, id: string, options: Partial<MatchCandid
       nftAlignment: overall,
       activitySync: overall,
       category: {
-        id: "defi_compatible",
-        label: "",
-        description: "",
-        minScore: 0,
-        highlight: "",
+        id: options.compatibilityScore?.category?.id ?? "defi_compatible",
+        label: options.compatibilityScore?.category?.label ?? "",
+        description: options.compatibilityScore?.category?.description ?? "",
+        minScore: options.compatibilityScore?.category?.minScore ?? 0,
+        highlight: options.compatibilityScore?.category?.highlight ?? "",
       },
-      reasoning: ["Reason"],
-      factors: [],
+      reasoning: options.compatibilityScore?.reasoning ?? ["Reason"],
+      factors: options.compatibilityScore?.factors ?? [],
     },
-    sharedInterests: [],
-    icebreakers: [],
-    personality: options.personality ?? { type: "Onchain Strategist", summary: "", highlights: [] },
+    sharedInterests: options.sharedInterests ?? [],
+    icebreakers: options.icebreakers ?? [],
+    personality: options.personality ?? buildPersonality(personalityType),
     interaction: options.interaction,
   };
-  return baseCandidate;
 }
 
 describe("prioritizeCandidates", () => {

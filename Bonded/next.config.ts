@@ -12,9 +12,6 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   output: "standalone",
-  experimental: {
-    instrumentationHook: true,
-  },
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60 * 60 * 24,
@@ -42,6 +39,11 @@ const nextConfig: NextConfig = {
   },
   webpack: (config) => {
     config.externals.push("pino-pretty", "lokijs", "encoding");
+    config.resolve = config.resolve ?? {};
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      "@react-native-async-storage/async-storage": false,
+    };
     return config;
   },
 };

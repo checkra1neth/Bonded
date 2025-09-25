@@ -26,6 +26,8 @@ type ConnectionContext = {
   participant: ChatParticipant | null;
 };
 
+type WebSocketResponseInit = ResponseInit & { webSocket: WebSocket };
+
 export async function GET(request: NextRequest) {
   if (request.headers.get("upgrade")?.toLowerCase() !== "websocket") {
     return new Response("Expected websocket", { status: 426 });
@@ -91,11 +93,16 @@ export async function GET(request: NextRequest) {
     }
   });
 
-  server.addEventListener("error", (event) => {
+  server.addEventListener("error", (event: Event) => {
     console.error("chat socket error", event);
   });
 
-  return new Response(null, { status: 101, webSocket: client });
+  const upgradeResponse: WebSocketResponseInit = {
+    status: 101,
+    webSocket: client as unknown as WebSocket,
+  };
+
+  return new Response(null, upgradeResponse);
 }
 
 function safeParseEvent(payload: string): ClientEvent | null {

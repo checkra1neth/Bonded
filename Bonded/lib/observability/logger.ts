@@ -1,5 +1,3 @@
-"use server";
-
 import { isProductionEnv, getServerEnv } from "../config/env";
 
 export type LogLevel = "debug" | "info" | "warn" | "error";

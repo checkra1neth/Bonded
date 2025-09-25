@@ -53,7 +53,10 @@ describe("mobile performance monitor", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    (globalThis as Record<string, unknown>).__resetObserver?.();
+    const resetObserver = (globalThis as Record<string, unknown>).__resetObserver as
+      | (() => void)
+      | undefined;
+    resetObserver?.();
   });
 
   it("reports slow frames and observer metrics", () => {
@@ -62,8 +65,11 @@ describe("mobile performance monitor", () => {
       samples.push(sample.slowFrameCount);
     });
 
-    (globalThis as Record<string, unknown>).__advanceFrame?.(60);
-    (globalThis as Record<string, unknown>).__advanceFrame?.(16);
+    const advanceFrame = (globalThis as Record<string, unknown>).__advanceFrame as
+      | ((duration?: number) => void)
+      | undefined;
+    advanceFrame?.(60);
+    advanceFrame?.(16);
 
     expect(samples.at(-1)).toBeGreaterThanOrEqual(1);
 

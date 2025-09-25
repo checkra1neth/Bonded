@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { logger } from "../../../lib/observability/logger";
-import { telemetry } from "../../../lib/observability/telemetry";
+import { logger } from "@/lib/observability/logger";
+import { telemetry } from "@/lib/observability/telemetry";
 
 const feedbackSchema = z.object({
   name: z.string().max(80).optional(),

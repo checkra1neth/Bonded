@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAddress, isAddress } from "viem";
 
-import { setNonceCookie } from "../../../lib/auth/cookies";
-import { createNonce } from "../../../lib/auth/nonce";
-import { createAuthMessage } from "../../../lib/auth/messages";
-import { getRequestHost, formatError } from "../../../lib/auth/utils";
-import { InvalidAddressError } from "../../../lib/auth/errors";
-import { logger } from "../../../lib/observability/logger";
-import { telemetry } from "../../../lib/observability/telemetry";
+import { setNonceCookie } from "@/lib/auth/cookies";
+import { createNonce } from "@/lib/auth/nonce";
+import { createAuthMessage } from "@/lib/auth/messages";
+import { getRequestHost, formatError } from "@/lib/auth/utils";
+import { InvalidAddressError } from "@/lib/auth/errors";
+import { logger } from "@/lib/observability/logger";
+import { telemetry } from "@/lib/observability/telemetry";
 
 export async function POST(request: NextRequest) {
   let parsedBody: { address?: string } | undefined;

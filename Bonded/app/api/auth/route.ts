@@ -1,8 +1,9 @@
 import { Errors, createClient } from "@farcaster/quick-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestHost } from "../../../lib/auth/utils";
-import { logger } from "../../../lib/observability/logger";
-import { telemetry } from "../../../lib/observability/telemetry";
+
+import { getRequestHost } from "@/lib/auth/utils";
+import { logger } from "@/lib/observability/logger";
+import { telemetry } from "@/lib/observability/telemetry";
 
 const client = createClient();
 
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
         path: request.nextUrl.pathname,
       });
       telemetry.trackEvent({
-        name: "auth.invalidToken", 
+        name: "auth.invalidToken",
         properties: { path: request.nextUrl.pathname },
       });
       return NextResponse.json({ message: "Invalid token" }, { status: 401 });
@@ -63,4 +64,3 @@ export async function GET(request: NextRequest) {
     throw e;
   }
 }
-

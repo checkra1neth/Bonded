@@ -343,9 +343,9 @@ export function ProfileManagementPanel({ profile, premiumHighlight }: ProfileMan
           allowList: nextAllowList,
         });
 
-        const prevValues =
+        const prevValues: readonly (string | number)[] =
           field === "fids" ? prev.allowList.fids : prev.allowList.walletAddresses;
-        const nextValues =
+        const nextValues: readonly (string | number)[] =
           field === "fids"
             ? normalized.allowList.fids
             : normalized.allowList.walletAddresses;

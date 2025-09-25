@@ -54,7 +54,7 @@ export async function encryptChatMessage(
 }
 
 export async function decryptChatMessage(
-  payload: EncryptedChatPayload,
+  payload: ChatMessageEncryption,
   conversationId?: string,
   options: DecryptOptions = {},
 ): Promise<string> {
@@ -121,14 +121,15 @@ async function getCryptoKey(record: ConversationKeyRecord): Promise<CryptoKey> {
 
 function encodeAssociatedData(data?: Record<string, string> | string): ArrayBuffer {
   if (!data) {
-    return new Uint8Array(0).buffer;
+    return new ArrayBuffer(0);
   }
 
   const encoder = new TextEncoder();
-  if (typeof data === "string") {
-    return encoder.encode(data).buffer;
-  }
-  return encoder.encode(stringifyAssociatedData(data)).buffer;
+  const encoded = typeof data === "string"
+    ? encoder.encode(data)
+    : encoder.encode(stringifyAssociatedData(data));
+
+  return toArrayBuffer(encoded);
 }
 
 function stringifyAssociatedData(data: Record<string, string>): string {
@@ -197,6 +198,16 @@ function generateRandomBytes(length: number): Uint8Array {
     return array;
   }
   throw new Error("Secure random generator not available");
+}
+
+function toArrayBuffer(view: Uint8Array): ArrayBuffer {
+  if (view.buffer instanceof ArrayBuffer && view.byteOffset === 0 && view.byteLength === view.buffer.byteLength) {
+    return view.buffer;
+  }
+
+  const copy = new Uint8Array(view.byteLength);
+  copy.set(view);
+  return copy.buffer;
 }
 
 function getSubtle(): SubtleCrypto {

@@ -24,7 +24,7 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
-label span {
+.fieldLabel span {
   display: block;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -33,9 +33,7 @@ label span {
   margin-bottom: 0.35rem;
 }
 
-input,
-textarea,
-select {
+.fieldControl {
   width: 100%;
   padding: 0.7rem 0.85rem;
   border-radius: 14px;
@@ -45,7 +43,7 @@ select {
   font: inherit;
 }
 
-textarea {
+.fieldTextarea {
   resize: vertical;
   min-height: 120px;
 }

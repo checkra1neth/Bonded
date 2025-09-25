@@ -3,6 +3,8 @@
 import { useCallback, type ChangeEventHandler } from "react";
 
 import type {
+  ActivityFilter,
+  CompatibilityCategoryId,
   PremiumFilterFacets,
   PremiumFilterOptions,
   PremiumFilterSummary,
@@ -24,7 +26,7 @@ const formatCategoryLabel = (id: string) =>
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(" ");
 
-const toggleValue = (values: string[] | undefined, value: string): string[] => {
+const toggleValue = <Value extends string>(values: Value[] | undefined, value: Value): Value[] => {
   const list = new Set(values ?? []);
   if (list.has(value)) {
     list.delete(value);
@@ -57,7 +59,7 @@ export function PremiumFiltersPanel({ filters, facets, summary, onChange, onRese
   );
 
   const handleCategoryToggle = useCallback(
-    (category: string) => {
+    (category: CompatibilityCategoryId) => {
       onChange({
         ...filters,
         categories: toggleValue(filters.categories, category),
@@ -87,7 +89,7 @@ export function PremiumFiltersPanel({ filters, facets, summary, onChange, onRese
   );
 
   const handleActivityToggle = useCallback(
-    (activity: string) => {
+    (activity: ActivityFilter) => {
       onChange({
         ...filters,
         activityFocus: toggleValue(filters.activityFocus, activity),

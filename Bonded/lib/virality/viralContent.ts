@@ -793,7 +793,7 @@ export function buildSuccessStoryAmplification(
     topAchievement?.description,
     achievements[1]?.description,
     shared[0]?.insight,
-  ]).filter(Boolean);
+  ]).filter((beat): beat is string => typeof beat === "string" && beat.trim().length > 0);
 
   const proofPoints = dedupe([
     ...(achievements.length ? achievements.map((achievement) => achievement.proof) : []),
@@ -918,12 +918,14 @@ export function trackViralContentPerformance(
 
   const platformScores = new Map<SocialPlatform, { score: number; events: number }>();
   const tagCounts = new Map<string, number>();
-  let topEvent: { id: string; score: number } | null = null;
+  let topEventScore = -Infinity;
+  let peakContentId: string | undefined;
 
   relevantEvents.forEach((event) => {
     const score = evaluateEventScore(event);
-    if (!topEvent || score > topEvent.score) {
-      topEvent = { id: event.id, score };
+    if (score > topEventScore) {
+      topEventScore = score;
+      peakContentId = event.id;
     }
 
     totalImpressions += event.metrics.impressions;
@@ -1007,7 +1009,7 @@ export function trackViralContentPerformance(
       score: momentumScore,
       classification: classifyMomentum(momentumScore),
       trendingTags,
-      peakContentId: topEvent?.id,
+      peakContentId,
     },
     recommendations,
   };

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { buildMatchCandidate, type CompatibilityProfile, type PortfolioSnapshot } from "./compatibility";
+import {
+  buildMatchCandidate,
+  type CompatibilityProfile,
+  type MatchCandidate,
+  type PortfolioSnapshot,
+} from "./compatibility";
 import {
   createMatchQueueState,
   matchQueueReducer,
@@ -42,18 +47,30 @@ const seekerProfile: CompatibilityProfile = {
   portfolio: seekerPortfolio,
 };
 
+const buildPersonalityAssessment = (
+  type: MatchCandidate["user"]["personality"],
+): MatchCandidate["personality"] => ({
+  type,
+  confidence: 0.8,
+  summary: "",
+  headline: "",
+  scores: [],
+  strengths: [],
+  growthAreas: [],
+});
+
 const createCandidate = (
   id: string,
   overrides: Partial<CompatibilityProfile["user"]> & {
     portfolio?: Partial<PortfolioSnapshot>;
-    interaction?: Parameters<typeof buildMatchCandidate>[2]["interaction"];
+    interaction?: NonNullable<Parameters<typeof buildMatchCandidate>[2]>["interaction"];
   } = {},
 ) => {
   const profile: CompatibilityProfile = {
     user: {
       id,
       displayName: overrides.displayName ?? id,
-      personality: overrides.personality ?? "Test Archetype",
+      personality: overrides.personality ?? "Banker",
     },
     portfolio: {
       ...seekerPortfolio,
@@ -61,9 +78,14 @@ const createCandidate = (
     },
   };
 
-  return buildMatchCandidate(seekerProfile, profile, {
+  const candidate = buildMatchCandidate(seekerProfile, profile, {
     interaction: overrides.interaction,
   });
+
+  return {
+    ...candidate,
+    personality: buildPersonalityAssessment(candidate.personality.type),
+  };
 };
 
 describe("matchQueueReducer", () => {

@@ -12,12 +12,44 @@ import {
   type PremiumFilterOptions,
 } from "../index";
 
-const createCandidate = (overrides: Partial<MatchCandidate>): MatchCandidate => {
+const buildPersonality = (
+  type: MatchCandidate["personality"]["type"],
+): MatchCandidate["personality"] => ({
+  type,
+  confidence: 0.85,
+  summary: "",
+  headline: "",
+  scores: [],
+  strengths: [],
+  growthAreas: [],
+});
+
+type CandidateOverrides = {
+  user?: Partial<MatchCandidate["user"]>;
+  compatibilityScore?: Partial<MatchCandidate["compatibilityScore"]> & {
+    category?: MatchCandidate["compatibilityScore"]["category"];
+  };
+  sharedInterests?: MatchCandidate["sharedInterests"];
+  icebreakers?: MatchCandidate["icebreakers"];
+  personality?: MatchCandidate["personality"];
+  interaction?: MatchCandidate["interaction"];
+};
+
+const createCandidate = (overrides: CandidateOverrides = {}): MatchCandidate => {
+  const personalityType = overrides.user?.personality ?? "Banker";
+  const defaultCategory: MatchCandidate["compatibilityScore"]["category"] = {
+    id: "defi_compatible",
+    label: "DeFi Compatible",
+    description: "",
+    minScore: 0.8,
+    highlight: "",
+  };
+
   return {
     user: {
       id: overrides.user?.id ?? "candidate",
       displayName: overrides.user?.displayName ?? "Candidate",
-      personality: overrides.user?.personality ?? "Onchain Strategist",
+      personality: personalityType,
       headline: overrides.user?.headline,
       bio: overrides.user?.bio,
     },
@@ -27,36 +59,24 @@ const createCandidate = (overrides: Partial<MatchCandidate>): MatchCandidate => 
       defiCompatibility: overrides.compatibilityScore?.defiCompatibility ?? 0.78,
       nftAlignment: overrides.compatibilityScore?.nftAlignment ?? 0.6,
       activitySync: overrides.compatibilityScore?.activitySync ?? 0.65,
-      category:
-        overrides.compatibilityScore?.category ??
-        ({
-          id: "defi_compatible",
-          label: "DeFi Compatible",
-          description: "",
-          minScore: 0.8,
-          highlight: "",
-        } as MatchCandidate["compatibilityScore"]["category"]),
-      reasoning: overrides.compatibilityScore?.reasoning ?? [
-        "Shared token conviction across AERO and DEGEN.",
-        "Active during overlapping hours",
-      ],
+      category: overrides.compatibilityScore?.category ?? defaultCategory,
+      reasoning:
+        overrides.compatibilityScore?.reasoning ?? [
+          "Shared token conviction across AERO and DEGEN.",
+          "Active during overlapping hours",
+        ],
       factors: overrides.compatibilityScore?.factors ?? [],
     },
     sharedInterests:
-      overrides.sharedInterests ??
-      ([
+      overrides.sharedInterests ?? [
         { type: "token", name: "DEGEN", detail: "DEGEN liquidity pools" },
         { type: "defi", name: "Aave", detail: "Aave looping" },
         { type: "activity", name: "Active Hours", detail: "18:00, 19:00, 20:00" },
-      ] as MatchCandidate["sharedInterests"]),
+      ],
     icebreakers: overrides.icebreakers ?? ["What's your DEGEN thesis?"],
-    personality: overrides.personality ?? {
-      type: overrides.user?.personality ?? "Onchain Strategist",
-      summary: "",
-      highlights: [],
-    },
+    personality: overrides.personality ?? buildPersonality(personalityType),
     interaction: overrides.interaction,
-  } as MatchCandidate;
+  };
 };
 
 describe("premium experience integrations", () => {
@@ -113,7 +133,7 @@ describe("premium experience integrations", () => {
       user: {
         id: "spotlight",
         displayName: "Liquidity Lore",
-        personality: "DeFi Explorer",
+        personality: "DeFi Degen",
         headline: "Treasury whisperer",
       },
       compatibilityScore: {

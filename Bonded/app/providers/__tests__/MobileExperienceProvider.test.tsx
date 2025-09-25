@@ -136,10 +136,10 @@ describe("MobileExperienceProvider", () => {
       expect(element.textContent).toBe("default");
     });
 
-    const connection = navigator.connection as {
-      effectiveType: string;
-      saveData: boolean;
+    const connectionHolder = navigator as Navigator & {
+      connection?: { effectiveType: string; saveData: boolean };
     };
+    const connection = connectionHolder.connection!;
     connection.effectiveType = "3g";
     connection.saveData = true;
 

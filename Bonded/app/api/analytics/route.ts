@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { logger } from "../../../lib/observability/logger";
-import { telemetry } from "../../../lib/observability/telemetry";
+import { logger } from "@/lib/observability/logger";
+import { telemetry } from "@/lib/observability/telemetry";
 
 const analyticsEventSchema = z.object({
   name: z.string().min(1).max(120),
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     telemetry.trackEvent({
       name,
-      distinctId: event.distinctId ?? "anonymous", 
+      distinctId: event.distinctId ?? "anonymous",
       properties: {
         category: event.category,
         source: "client",
